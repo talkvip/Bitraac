@@ -1,13 +1,15 @@
 package eu.verdelhan.bitraac.example;
 
+import eu.verdelhan.bitraac.AlgorithmComparator;
+import java.math.BigDecimal;
+
 public class Comparison {
 
-    /**
-     * @param args
-     */
     public static void main(String[] args) {
-        // TODO Auto-generated method stub
+
+		BigDecimal initialBalance = new BigDecimal(100);
+        AlgorithmComparator ac = new AlgorithmComparator(initialBalance);
+		ac.getData();
 
     }
-
 }
