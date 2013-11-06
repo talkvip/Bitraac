@@ -23,10 +23,10 @@ public class DummyBinaryAlgorithm extends TradingAlgorithm {
 		double trendCoef = getTrendCoef();
 		if (trendCoef > 1.02) {
 			// Up trend
-			order = new MarketOrder(Order.OrderType.ASK, new BigDecimal(0.01), Currencies.BTC, Currencies.USD);
+			order = new MarketOrder(Order.OrderType.ASK, new BigDecimal(0.1), Currencies.BTC, Currencies.USD);
 		} else if (trendCoef < 0.99) {
 			// Down trend
-			order = new MarketOrder(Order.OrderType.BID, new BigDecimal(0.01), Currencies.BTC, Currencies.USD);
+			order = new MarketOrder(Order.OrderType.BID, new BigDecimal(0.1), Currencies.BTC, Currencies.USD);
 		} else {
 			// Stability
 			order = null;

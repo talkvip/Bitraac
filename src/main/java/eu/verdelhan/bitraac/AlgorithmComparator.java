@@ -28,12 +28,17 @@ public class AlgorithmComparator {
 
     public void compare(TradingAlgorithm... algorithms) {
         for (TradingAlgorithm algorithm : algorithms) {
+			BigDecimal btcUsd = null;
 			for (ChartData sample : getLocalData()) {
 				System.out.println("balance: USD=" + usdBalance + " BTC="+ btcBalance);
 				algorithm.addChartData(sample);
-				Order order = algorithm.placeOrder();
-				processMarketOrder(order, sample);
+				processMarketOrder(algorithm.placeOrder(), sample);
+				btcUsd = sample.getWeightedPrice();
 			}
+			double result = usdBalance.add(btcBalance.multiply(btcUsd)).doubleValue();
+			System.out.println("************");
+			System.out.println("Result (assets): $" + result);
+			System.out.println("************");
         }
     }
 

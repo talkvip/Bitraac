@@ -7,9 +7,9 @@ public class Comparison {
 
     public static void main(String[] args) {
 
-		BigDecimal initialBalance = new BigDecimal(100);
+		BigDecimal initialBalance = new BigDecimal(1000);
         AlgorithmComparator ac = new AlgorithmComparator(initialBalance);
-		ac.compare(new DummyBinaryAlgorithm());
+		ac.compare(new DummyBinaryAlgorithm(), new EnhancedBinaryAlgorithm());
 
     }
 }
