@@ -9,7 +9,7 @@ public class Comparison {
 
 		BigDecimal initialBalance = new BigDecimal(100);
         AlgorithmComparator ac = new AlgorithmComparator(initialBalance);
-		ac.getData();
+		ac.compare(new DummyBinaryAlgorithm());
 
     }
 }
