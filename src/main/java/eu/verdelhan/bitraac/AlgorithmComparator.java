@@ -8,7 +8,6 @@ import com.xeiam.xchange.bitcoincharts.service.polling.BitcoinChartsPollingMarke
 import com.xeiam.xchange.dto.Order;
 import eu.verdelhan.bitraac.algorithms.TradingAlgorithm;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -18,19 +17,19 @@ public class AlgorithmComparator {
 
 	private BitcoinChartsPollingMarketDataService marketDataService = (BitcoinChartsPollingMarketDataService) EXCHANGE.getPollingMarketDataService();
 
-	private BigDecimal balance;
-	private BigDecimal btc;
+	private BigDecimal usdBalance;
+	private BigDecimal btcBalance;
 
 	public AlgorithmComparator(BigDecimal initialBalance)
 	{
-		this.balance = initialBalance;
-		this.btc = new BigDecimal(0);
+		this.usdBalance = initialBalance;
+		this.btcBalance = new BigDecimal(0);
 	}
 
     public void compare(TradingAlgorithm... algorithms) {
         for (TradingAlgorithm algorithm : algorithms) {
 			for (ChartData sample : getLocalData()) {
-				System.out.println("balance: USD=" + balance + " BTC="+ btc);
+				System.out.println("balance: USD=" + usdBalance + " BTC="+ btcBalance);
 				algorithm.addChartData(sample);
 				Order order = algorithm.placeOrder();
 				processMarketOrder(order, sample);
@@ -45,6 +44,9 @@ public class AlgorithmComparator {
 		}
 	}
 
+	/**
+	 * @return sample data
+	 */
 	public ChartData[] getLocalData()
 	{
 		ArrayList<ArrayList<String>> dataList = new ArrayList<ArrayList<String>>(100);
@@ -222,34 +224,48 @@ public class AlgorithmComparator {
 		return chartData;
 	}
 
+	/**
+	 * Process the market order.
+	 * @param order the order to be processed
+	 * @param marketData the current market data
+	 */
 	private void processMarketOrder(Order order, ChartData marketData) {
 		if (order != null) {
 			if (order.getType() == Order.OrderType.BID) {
 				// Buy
-				if (isEnoughMoney(order)) {
-					balance = balance.subtract(order.getTradableAmount());
-					btc = btc.add(order.getTradableAmount().divide(marketData.getWeightedPrice(), 12, RoundingMode.HALF_UP));
+				if (isEnoughMoney(order, marketData)) {
+					usdBalance = usdBalance.subtract(order.getTradableAmount().multiply(marketData.getWeightedPrice()));
+					btcBalance = btcBalance.add(order.getTradableAmount());
 				}
 			} else if (order.getType() == Order.OrderType.ASK) {
 				// Sell
-				if (isEnoughBtc(order, marketData)) {
-					btc = btc.subtract(order.getTradableAmount().divide(marketData.getWeightedPrice(), 12, RoundingMode.HALF_UP));
-					balance = balance.add(order.getTradableAmount());
+				if (isEnoughBtc(order)) {
+					btcBalance = btcBalance.subtract(order.getTradableAmount());
+					usdBalance = usdBalance.add(order.getTradableAmount().multiply(marketData.getWeightedPrice()));
 				}
 			}
 		}
 	}
 
-	private boolean isEnoughMoney(Order order) {
+	/**
+	 * @param order the order to be placed
+	 * @param marketData the current market data
+	 * @return true if there is enough money to place the order, false otherwise
+	 */
+	private boolean isEnoughMoney(Order order, ChartData marketData) {
 		if (order.getType() == Order.OrderType.BID) {
-			return (order.getTradableAmount().compareTo(balance) <= 0);
+			return (order.getTradableAmount().multiply(marketData.getWeightedPrice()).compareTo(usdBalance) <= 0);
 		}
 		return true;
 	}
 
-	private boolean isEnoughBtc(Order order, ChartData marketData) {
+	/**
+	 * @param order the order to be placed
+	 * @return true if there is enough bitcoins to place the order, false otherwise
+	 */
+	private boolean isEnoughBtc(Order order) {
 		if (order.getType() == Order.OrderType.ASK) {
-			return (order.getTradableAmount().divide(marketData.getWeightedPrice(), 12, RoundingMode.HALF_UP).compareTo(btc) <= 0);
+			return (order.getTradableAmount().compareTo(btcBalance) <= 0);
 		}
 		return true;
 	}
