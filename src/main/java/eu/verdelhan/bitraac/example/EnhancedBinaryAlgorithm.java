@@ -47,7 +47,7 @@ public class EnhancedBinaryAlgorithm extends TradingAlgorithm {
 			BigDecimal previousPrice = data.get(data.size()-2).getWeightedPrice();
 			BigDecimal lastPrice = data.get(data.size()-1).getWeightedPrice();
 			trendCoef = previousPrice.divide(lastPrice, 12, RoundingMode.HALF_UP).doubleValue();
-			System.out.println("pp="+previousPrice+" lp="+lastPrice+ " coef="+trendCoef);
+			//System.out.println("pp="+previousPrice+" lp="+lastPrice+ " coef="+trendCoef);
 		}
 		return trendCoef;
 	}

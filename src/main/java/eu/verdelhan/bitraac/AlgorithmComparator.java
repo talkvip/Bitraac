@@ -10,6 +10,7 @@ import com.xeiam.xchange.currency.Currencies;
 import com.xeiam.xchange.dto.Order;
 import com.xeiam.xchange.dto.marketdata.Trade;
 import com.xeiam.xchange.dto.marketdata.Trades;
+import com.xeiam.xchange.dto.trade.MarketOrder;
 import com.xeiam.xchange.service.polling.PollingMarketDataService;
 import eu.verdelhan.bitraac.algorithms.TradingAlgorithm;
 import java.io.IOException;
@@ -27,27 +28,47 @@ public class AlgorithmComparator {
 	private BitcoinChartsPollingMarketDataService marketDataService = (BitcoinChartsPollingMarketDataService) EXCHANGE.getPollingMarketDataService();
 	private PollingMarketDataService bitstampMarketDataService = BITSTAMP_EXCHANGE.getPollingMarketDataService();
 
-	private BigDecimal usdBalance;
-	private BigDecimal btcBalance;
+	private BigDecimal initialUsdBalance;
+	private BigDecimal initialBtcBalance;
+	private double transactionFee;
 
-	public AlgorithmComparator(BigDecimal initialBalance)
+	private BigDecimal currentUsdBalance;
+	private BigDecimal currentBtcBalance;
+
+	/**
+	 * @param initialUsdBalance the initial USD balance
+	 * @param transactionFee the transaction (e.g. 0.5 for 0.5%)
+	 */
+	public AlgorithmComparator(double initialUsdBalance, double transactionFee)
 	{
-		this.usdBalance = initialBalance;
-		this.btcBalance = new BigDecimal(0);
+		this(initialUsdBalance, 0, transactionFee);
+	}
+
+	/**
+	 * @param initialUsdBalance the initial USD balance
+	 * @param initialBtcBalance the initial BTC balance
+	 * @param transactionFee the transaction (e.g. 0.5 for 0.5%)
+	 */
+	public AlgorithmComparator(double initialUsdBalance, double initialBtcBalance, double transactionFee)
+	{
+		this.initialUsdBalance = new BigDecimal(initialUsdBalance);
+		this.initialBtcBalance = new BigDecimal(initialBtcBalance);
+		this.transactionFee = transactionFee;
 	}
 
     public void compare(TradingAlgorithm... algorithms) {
         for (TradingAlgorithm algorithm : algorithms) {
 			BigDecimal btcUsd = null;
+			currentUsdBalance = initialUsdBalance;
+			currentBtcBalance = initialBtcBalance;
 			for (ChartData sample : getLocalData()) {
-				System.out.println("balance: USD=" + usdBalance + " BTC="+ btcBalance);
+				//System.out.println("balance: USD=" + currentUsdBalance + " BTC="+ currentBtcBalance);
 				algorithm.addChartData(sample);
-				processMarketOrder(algorithm.placeOrder(), sample);
+				processMarketOrder((MarketOrder) algorithm.placeOrder(), sample);
 				btcUsd = sample.getWeightedPrice();
 			}
-			double result = usdBalance.add(btcBalance.multiply(btcUsd)).doubleValue();
 			System.out.println("************");
-			System.out.println("Result (assets): $" + result);
+			System.out.println("Result (assets): $" + getOverallEarnings(btcUsd));
 			System.out.println("************");
         }
     }
@@ -84,6 +105,16 @@ public class AlgorithmComparator {
 		for (ChartData chartData : data) {
 			System.out.println(chartData);
 		}
+	}
+
+	/**
+	 * @param currentBtcUsd the current BTC/USD rate
+	 * @return the overall earnings (can be negative in case of loss) in USD
+	 */
+	public double getOverallEarnings(BigDecimal currentBtcUsd) {
+		BigDecimal usdDifference = currentUsdBalance.subtract(initialUsdBalance);
+		BigDecimal btcDifference = currentBtcBalance.subtract(initialBtcBalance);
+		return usdDifference.add(btcDifference.multiply(currentBtcUsd)).doubleValue();
 	}
 
 	/**
@@ -267,23 +298,23 @@ public class AlgorithmComparator {
 	}
 
 	/**
-	 * Process the market order.
+	 * Process a market order.
 	 * @param order the order to be processed
 	 * @param marketData the current market data
 	 */
-	private void processMarketOrder(Order order, ChartData marketData) {
+	private void processMarketOrder(MarketOrder order, ChartData marketData) {
 		if (order != null) {
 			if (order.getType() == Order.OrderType.BID) {
 				// Buy
-				if (isEnoughMoney(order, marketData)) {
-					usdBalance = usdBalance.subtract(order.getTradableAmount().multiply(marketData.getWeightedPrice()));
-					btcBalance = btcBalance.add(order.getTradableAmount());
+				if (isEnoughUsd(order, marketData)) {
+					currentUsdBalance = currentUsdBalance.subtract(order.getTradableAmount().multiply(marketData.getWeightedPrice()));
+					currentBtcBalance = currentBtcBalance.add(order.getTradableAmount());
 				}
 			} else if (order.getType() == Order.OrderType.ASK) {
 				// Sell
 				if (isEnoughBtc(order)) {
-					btcBalance = btcBalance.subtract(order.getTradableAmount());
-					usdBalance = usdBalance.add(order.getTradableAmount().multiply(marketData.getWeightedPrice()));
+					currentBtcBalance = currentBtcBalance.subtract(order.getTradableAmount());
+					currentUsdBalance = currentUsdBalance.add(order.getTradableAmount().multiply(marketData.getWeightedPrice()));
 				}
 			}
 		}
@@ -294,9 +325,9 @@ public class AlgorithmComparator {
 	 * @param marketData the current market data
 	 * @return true if there is enough money to place the order, false otherwise
 	 */
-	private boolean isEnoughMoney(Order order, ChartData marketData) {
+	private boolean isEnoughUsd(Order order, ChartData marketData) {
 		if (order.getType() == Order.OrderType.BID) {
-			return (order.getTradableAmount().multiply(marketData.getWeightedPrice()).compareTo(usdBalance) <= 0);
+			return (order.getTradableAmount().multiply(marketData.getWeightedPrice()).compareTo(currentUsdBalance) <= 0);
 		}
 		return true;
 	}
@@ -307,7 +338,7 @@ public class AlgorithmComparator {
 	 */
 	private boolean isEnoughBtc(Order order) {
 		if (order.getType() == Order.OrderType.ASK) {
-			return (order.getTradableAmount().compareTo(btcBalance) <= 0);
+			return (order.getTradableAmount().compareTo(currentBtcBalance) <= 0);
 		}
 		return true;
 	}

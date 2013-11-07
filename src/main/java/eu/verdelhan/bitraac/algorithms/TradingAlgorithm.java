@@ -35,6 +35,6 @@ public abstract class TradingAlgorithm {
 	 * Place an order (bid or ask).
 	 * @return the placed order
 	 */
-    public abstract Order placeOrder();
+	public abstract Order placeOrder();
 
 }
