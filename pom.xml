@@ -20,6 +20,11 @@
 			<artifactId>xchange-bitcoincharts</artifactId>
 			<version>1.9.0</version>
 		</dependency>
+		<dependency>
+			<groupId>com.xeiam.xchange</groupId>
+			<artifactId>xchange-bitstamp</artifactId>
+			<version>1.9.0</version>
+		</dependency>
 	</dependencies>
 
 </project>

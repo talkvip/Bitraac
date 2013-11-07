@@ -5,17 +5,27 @@ import com.xeiam.xchange.ExchangeFactory;
 import com.xeiam.xchange.bitcoincharts.BitcoinChartsExchange;
 import com.xeiam.xchange.bitcoincharts.dto.charts.ChartData;
 import com.xeiam.xchange.bitcoincharts.service.polling.BitcoinChartsPollingMarketDataService;
+import com.xeiam.xchange.bitstamp.BitstampExchange;
+import com.xeiam.xchange.currency.Currencies;
 import com.xeiam.xchange.dto.Order;
+import com.xeiam.xchange.dto.marketdata.Trade;
+import com.xeiam.xchange.dto.marketdata.Trades;
+import com.xeiam.xchange.service.polling.PollingMarketDataService;
 import eu.verdelhan.bitraac.algorithms.TradingAlgorithm;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class AlgorithmComparator {
 
 	private static final Exchange EXCHANGE = ExchangeFactory.INSTANCE.createExchange(BitcoinChartsExchange.class.getName());
+	private static final Exchange BITSTAMP_EXCHANGE = ExchangeFactory.INSTANCE.createExchange(BitstampExchange.class.getName());
 
 	private BitcoinChartsPollingMarketDataService marketDataService = (BitcoinChartsPollingMarketDataService) EXCHANGE.getPollingMarketDataService();
+	private PollingMarketDataService bitstampMarketDataService = BITSTAMP_EXCHANGE.getPollingMarketDataService();
 
 	private BigDecimal usdBalance;
 	private BigDecimal btcBalance;
@@ -42,7 +52,34 @@ public class AlgorithmComparator {
         }
     }
 
-	public void getData() {
+	public void dumpBitstampData() {
+		try
+		{
+			Trades trades = bitstampMarketDataService.getTrades(Currencies.BTC, Currencies.USD, 0, 3);
+			System.out.println("trades: off 0 lim 3");
+			for (Trade t : trades.getTrades()) {
+				System.out.println("t: "+t);
+			}
+
+			trades = bitstampMarketDataService.getTrades(Currencies.BTC, Currencies.USD, 1, 3);
+			System.out.println("trades: off 1 lim 3");
+			for (Trade t : trades.getTrades()) {
+				System.out.println("t: "+t);
+			}
+
+			trades = bitstampMarketDataService.getTrades(Currencies.BTC, Currencies.USD, 1, 2);
+			System.out.println("trades: off 1 lim 2");
+			for (Trade t : trades.getTrades()) {
+				System.out.println("t: "+t);
+			}
+		}
+		catch (IOException ex)
+		{
+			Logger.getLogger(AlgorithmComparator.class.getName()).log(Level.SEVERE, null, ex);
+		}
+	}
+
+	public void dumpBitcoinchartsData() {
 		ChartData[] data = marketDataService.getChartData("bitstampUSD", 7);
 		for (ChartData chartData : data) {
 			System.out.println(chartData);

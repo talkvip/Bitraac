@@ -9,7 +9,8 @@ public class Comparison {
 
 		BigDecimal initialBalance = new BigDecimal(1000);
         AlgorithmComparator ac = new AlgorithmComparator(initialBalance);
-		ac.compare(new DummyBinaryAlgorithm(), new EnhancedBinaryAlgorithm());
+		ac.dumpBitstampData();
+		//ac.compare(new DummyBinaryAlgorithm(), new EnhancedBinaryAlgorithm());
 
     }
 }
