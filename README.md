@@ -1,6 +1,8 @@
 # Bitraac
 
-... for Bitcoin Trading Algorithms Comparator.
+... for **Bit**coin **Tra**ding **A**lgorithms **C**omparator.
+
+See the [algorithmic trading strategies](http://en.wikipedia.org/wiki/Algorithmic_trading#Strategies).
 
 ## Current restrictions
 
