@@ -10,7 +10,7 @@ See the [algorithmic trading strategies](http://en.wikipedia.org/wiki/Algorithmi
 
   * No transaction fees
   * No limit orders
-  * No more than 2 dummy algorithms
+  * No more than 3 algorithms
   * No streaming data
   * No influence on exchange rate
 
