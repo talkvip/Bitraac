@@ -8,7 +8,7 @@ public class Comparison {
 
         AlgorithmComparator ac = new AlgorithmComparator(1000, 0.5);
 		//ac.dumpBitstampData();
-		ac.compare(new NoAlgorithm(),
+		ac.compare(new NoAlgorithmAlgorithm(),
 				new DummyBinaryAlgorithm(),
 				new EnhancedBinaryAlgorithm(),
 				new SimpleMovingAveragesAlgorithm());

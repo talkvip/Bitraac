@@ -6,7 +6,7 @@ import com.xeiam.xchange.dto.trade.MarketOrder;
 import eu.verdelhan.bitraac.algorithms.TradingAlgorithm;
 import java.math.BigDecimal;
 
-public class NoAlgorithm extends TradingAlgorithm {
+public class NoAlgorithmAlgorithm extends TradingAlgorithm {
 
 	@Override
 	public boolean isEnoughData()
