@@ -126,20 +126,22 @@ public class AlgorithmComparator {
 		return usdDifference.add(btcDifference.multiply(currentBtcUsd)).doubleValue();
 	}
 
-    public ArrayList<Trade> getLocalTrades() throws IOException {
+    public static ArrayList<Trade> getLocalTrades() {
         ArrayList<Trade> trades = new ArrayList<Trade>();
-        
-        FileReader fileReader = new FileReader("bitstamp_usd.0.csv");
-        CSVReader csvReader = new CSVReader(fileReader, ',');
-        String[] line;
-        while ((line = csvReader.readNext()) != null) {
-            Date timestamp = new Date(Long.parseLong(line[0]) * 1000);
-            BigMoney price = BigMoney.of(CurrencyUnit.USD, new BigDecimal(line[1]));
-            BigDecimal tradableAmount = new BigDecimal(line[2]);
-            Trade trade = new Trade(null, tradableAmount, Currencies.BTC, Currencies.USD, price, timestamp, 0);
-            trades.add(trade);
+        try {
+            FileReader fileReader = new FileReader("bitstamp_usd.0.csv");
+            CSVReader csvReader = new CSVReader(fileReader, ',');
+            String[] line;
+            while ((line = csvReader.readNext()) != null) {
+                Date timestamp = new Date(Long.parseLong(line[0]) * 1000);
+                BigMoney price = BigMoney.of(CurrencyUnit.USD, new BigDecimal(line[1]));
+                BigDecimal tradableAmount = new BigDecimal(line[2]);
+                Trade trade = new Trade(null, tradableAmount, Currencies.BTC, Currencies.USD, price, timestamp, 0);
+                trades.add(trade);
+            }
+        } catch (IOException ioe) {
+            Logger.getLogger(AlgorithmComparator.class.getName()).log(Level.SEVERE, "Unable to load trades from CSV", ioe);
         }
-        
         return trades;
     }
 
