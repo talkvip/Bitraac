@@ -10,6 +10,13 @@
 	<description>Bitcoin Trading Algorithms Comparator</description>
 
 	<dependencies>
+	
+		<dependency>
+			<groupId>net.sf.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
+			<version>2.0</version>
+		</dependency>
+
 		<dependency>
 			<groupId>com.xeiam.xchange</groupId>
 			<artifactId>xchange-core</artifactId>
@@ -25,6 +32,7 @@
 			<artifactId>xchange-bitstamp</artifactId>
 			<version>1.9.0</version>
 		</dependency>
+		
 	</dependencies>
 
 </project>

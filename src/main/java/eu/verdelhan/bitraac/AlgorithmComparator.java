@@ -1,5 +1,19 @@
 package eu.verdelhan.bitraac;
 
+import java.io.FileReader;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.joda.money.BigMoney;
+import org.joda.money.CurrencyUnit;
+
+import au.com.bytecode.opencsv.CSVReader;
+
 import com.xeiam.xchange.Exchange;
 import com.xeiam.xchange.ExchangeFactory;
 import com.xeiam.xchange.bitcoincharts.BitcoinChartsExchange;
@@ -12,13 +26,8 @@ import com.xeiam.xchange.dto.marketdata.Trade;
 import com.xeiam.xchange.dto.marketdata.Trades;
 import com.xeiam.xchange.dto.trade.MarketOrder;
 import com.xeiam.xchange.service.polling.PollingMarketDataService;
+
 import eu.verdelhan.bitraac.algorithms.TradingAlgorithm;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class AlgorithmComparator {
 
@@ -116,6 +125,23 @@ public class AlgorithmComparator {
 		BigDecimal btcDifference = currentBtcBalance.subtract(initialBtcBalance);
 		return usdDifference.add(btcDifference.multiply(currentBtcUsd)).doubleValue();
 	}
+
+    public ArrayList<Trade> getLocalTrades() throws IOException {
+        ArrayList<Trade> trades = new ArrayList<Trade>();
+        
+        FileReader fileReader = new FileReader("bitstamp_usd.0.csv");
+        CSVReader csvReader = new CSVReader(fileReader, ',');
+        String[] line;
+        while ((line = csvReader.readNext()) != null) {
+            Date timestamp = new Date(Long.parseLong(line[0]) * 1000);
+            BigMoney price = BigMoney.of(CurrencyUnit.USD, new BigDecimal(line[1]));
+            BigDecimal tradableAmount = new BigDecimal(line[2]);
+            Trade trade = new Trade(null, tradableAmount, Currencies.BTC, Currencies.USD, price, timestamp, 0);
+            trades.add(trade);
+        }
+        
+        return trades;
+    }
 
 	/**
 	 * @return sample data
