@@ -1,19 +1,17 @@
 package eu.verdelhan.bitraac.example;
 
-import java.math.BigDecimal;
-
 import com.xeiam.xchange.currency.Currencies;
 import com.xeiam.xchange.dto.Order;
 import com.xeiam.xchange.dto.trade.MarketOrder;
-
 import eu.verdelhan.bitraac.Indicators;
 import eu.verdelhan.bitraac.algorithms.TradingAlgorithm;
+import java.math.BigDecimal;
 
 public class SimpleMovingAveragesAlgorithm extends TradingAlgorithm {
 
     @Override
-    public boolean isEnoughData() {
-        return getPreviousChartData().size() > 10;
+    public boolean isEnoughTrades() {
+        return getPreviousTrades().size() > 10;
     }
 
     @Override
@@ -35,7 +33,7 @@ public class SimpleMovingAveragesAlgorithm extends TradingAlgorithm {
 
     private double getTrendCoef() {
         double trendCoef = 1.0;
-        if (isEnoughData()) {
+        if (isEnoughTrades()) {
             double movingAvg10 = Indicators.getMovingAverage(10).doubleValue();
             double movingAvg3 = Indicators.getMovingAverage(3).doubleValue();
             trendCoef = movingAvg3 / movingAvg10;

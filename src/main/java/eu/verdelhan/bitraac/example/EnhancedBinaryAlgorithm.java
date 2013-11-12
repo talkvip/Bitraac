@@ -4,9 +4,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 
-import com.xeiam.xchange.bitcoincharts.dto.charts.ChartData;
 import com.xeiam.xchange.currency.Currencies;
 import com.xeiam.xchange.dto.Order;
+import com.xeiam.xchange.dto.marketdata.Trade;
 import com.xeiam.xchange.dto.trade.MarketOrder;
 
 import eu.verdelhan.bitraac.algorithms.TradingAlgorithm;
@@ -14,8 +14,8 @@ import eu.verdelhan.bitraac.algorithms.TradingAlgorithm;
 public class EnhancedBinaryAlgorithm extends TradingAlgorithm {
 
     @Override
-    public boolean isEnoughData() {
-        return getPreviousChartData().size() > 2;
+    public boolean isEnoughTrades() {
+        return getPreviousTrades().size() > 2;
     }
 
     @Override
@@ -43,10 +43,10 @@ public class EnhancedBinaryAlgorithm extends TradingAlgorithm {
 
     private double getTrendCoef() {
         double trendCoef = 1.0;
-        if (isEnoughData()) {
-            ArrayList<ChartData> data = getPreviousChartData();
-            BigDecimal previousPrice = data.get(data.size() - 2).getWeightedPrice();
-            BigDecimal lastPrice = data.get(data.size() - 1).getWeightedPrice();
+        if (isEnoughTrades()) {
+            ArrayList<Trade> trades = getPreviousTrades();
+            BigDecimal previousPrice = trades.get(trades.size() - 2).getPrice().getAmount();
+            BigDecimal lastPrice = trades.get(trades.size() - 1).getPrice().getAmount();
             trendCoef = previousPrice.divide(lastPrice, 12, RoundingMode.HALF_UP).doubleValue();
             // System.out.println("pp="+previousPrice+" lp="+lastPrice+
             // " coef="+trendCoef);

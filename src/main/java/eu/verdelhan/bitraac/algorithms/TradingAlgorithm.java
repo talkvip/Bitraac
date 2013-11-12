@@ -1,35 +1,35 @@
 package eu.verdelhan.bitraac.algorithms;
 
-import com.xeiam.xchange.bitcoincharts.dto.charts.ChartData;
 import com.xeiam.xchange.dto.Order;
+import com.xeiam.xchange.dto.marketdata.Trade;
 import java.util.ArrayList;
 
 public abstract class TradingAlgorithm {
 
-	private ArrayList<ChartData> previousChartData = new ArrayList<ChartData>(1000);
+	private ArrayList<Trade> previousTrades = new ArrayList<Trade>(1000);
 
 	/**
-	 * Get the previous data.
+	 * Get the previous trades.
 	 * Can be used for trend computation.
-	 * @return the previous data
+	 * @return the previous trades
 	 */
-	public ArrayList<ChartData> getPreviousChartData()
+	public ArrayList<Trade> getPreviousTrades()
 	{
-		return previousChartData;
+		return previousTrades;
 	}
 
 	/**
-	 * Add a data sample to previous data.
-	 * @param chartData the data sample to be added
+	 * Add a trade to previous trades.
+	 * @param trade the trade to be added
 	 */
-	public void addChartData(ChartData chartData) {
-		previousChartData.add(chartData);
+	public void addTrade(Trade trade) {
+		previousTrades.add(trade);
 	}
 
 	/**
-	 * @return true if there is enough data to execute the algorithm, false otherwise
+	 * @return true if there is enough trades to execute the algorithm, false otherwise
 	 */
-	public abstract boolean isEnoughData();
+	public abstract boolean isEnoughTrades();
 
 	/**
 	 * Place an order (bid or ask).
