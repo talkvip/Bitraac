@@ -4,6 +4,7 @@ import com.xeiam.xchange.dto.marketdata.Trade;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * See http://bitcoincharts.com/charts/
@@ -29,5 +30,19 @@ public class Indicators {
         }
         return average.divide(new BigDecimal(lastValues), RoundingMode.HALF_UP);
     }
+
+	/**
+	 * @param timestamp the date for which we want the trade volume
+	 * @return the trade volume at timestamp
+	 */
+	public static BigDecimal getVolume(Date timestamp) {
+		BigDecimal volume = BigDecimal.ZERO;
+		for (Trade trade : TRADES) {
+			if (timestamp.equals(trade.getTimestamp())) {
+				volume = volume.add(trade.getPrice().getAmount());
+			}
+		}
+		return volume;
+	}
 
 }

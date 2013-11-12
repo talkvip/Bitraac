@@ -34,10 +34,9 @@ public class SimpleMovingAveragesAlgorithm extends TradingAlgorithm {
     private double getTrendCoef() {
         double trendCoef = 1.0;
         if (isEnoughTrades()) {
+            double movingAvg25 = Indicators.getMovingAverage(25).doubleValue();
             double movingAvg10 = Indicators.getMovingAverage(10).doubleValue();
-            double movingAvg3 = Indicators.getMovingAverage(3).doubleValue();
-            trendCoef = movingAvg3 / movingAvg10;
-            // System.out.println("avg10="+movingAvg10+"  avg3="+movingAvg3+"  coef="+trendCoef);
+            trendCoef = movingAvg10 / movingAvg25;
         }
         return trendCoef;
     }
