@@ -2,6 +2,7 @@
 .project
 .settings/
 .idea/
+nb-configuration.xml
 *.iml
 .DS_Store
 log/
