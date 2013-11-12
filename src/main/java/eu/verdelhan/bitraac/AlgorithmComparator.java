@@ -70,27 +70,16 @@ public class AlgorithmComparator {
 			System.out.println("Result (assets): $" + getOverallEarnings(btcUsd));
 			System.out.println("************");
         }
+//		ComparativeChart.addTradeSeries("trades", getLocalTrades());
+//		ComparativeChart.show();
     }
 
 	public void dumpBitstampData() {
 		try
 		{
-			Trades trades = marketDataService.getTrades(Currencies.BTC, Currencies.USD, 0, 3);
-			System.out.println("trades: off 0 lim 3");
+			Trades trades = marketDataService.getTrades(Currencies.BTC, Currencies.USD);
 			for (Trade t : trades.getTrades()) {
-				System.out.println("t: "+t);
-			}
-
-			trades = marketDataService.getTrades(Currencies.BTC, Currencies.USD, 1, 3);
-			System.out.println("trades: off 1 lim 3");
-			for (Trade t : trades.getTrades()) {
-				System.out.println("t: "+t);
-			}
-
-			trades = marketDataService.getTrades(Currencies.BTC, Currencies.USD, 1, 2);
-			System.out.println("trades: off 1 lim 2");
-			for (Trade t : trades.getTrades()) {
-				System.out.println("t: "+t);
+				System.out.println(t);
 			}
 		}
 		catch (IOException ex)

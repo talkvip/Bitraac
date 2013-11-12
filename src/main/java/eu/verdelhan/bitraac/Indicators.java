@@ -1,10 +1,9 @@
 package eu.verdelhan.bitraac;
 
+import com.xeiam.xchange.dto.marketdata.Trade;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
-
-import com.xeiam.xchange.dto.marketdata.Trade;
 
 /**
  * See http://bitcoincharts.com/charts/
@@ -13,6 +12,10 @@ public class Indicators {
 
     private static final ArrayList<Trade> TRADES = AlgorithmComparator.getLocalTrades();
 
+	/**
+	 * @param lastValues the number of values to use (i.e. the n last values)
+	 * @return the moving average price of trades
+	 */
     public static BigDecimal getMovingAverage(int lastValues) {
         int nbValues = TRADES.size();
         if (lastValues >= nbValues) {
