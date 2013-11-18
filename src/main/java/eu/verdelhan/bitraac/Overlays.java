@@ -2,6 +2,7 @@ package eu.verdelhan.bitraac;
 
 import com.xeiam.xchange.dto.marketdata.Trade;
 import eu.verdelhan.bitraac.data.ExchangeMarket;
+import eu.verdelhan.bitraac.data.Period;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Date;
@@ -30,6 +31,18 @@ public class Overlays {
         }
         return average.divide(new BigDecimal(lastValues), RoundingMode.HALF_UP);
     }
+
+	/**
+	 * @param period the period for which we want the trade volume
+	 * @return the trade volume during the period
+	 */
+	public static BigDecimal getVolume(Period period) {
+		BigDecimal volume = BigDecimal.ZERO;
+		for (Trade trade : period.getTrades()) {
+			volume = volume.add(trade.getPrice().getAmount());
+		}
+		return volume;
+	}
 
 	/**
 	 * @param timestamp the date for which we want the trade volume
