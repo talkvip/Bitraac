@@ -1,31 +1,13 @@
 package eu.verdelhan.bitraac;
 
-import au.com.bytecode.opencsv.CSVReader;
-import com.xeiam.xchange.Exchange;
-import com.xeiam.xchange.ExchangeFactory;
-import com.xeiam.xchange.bitstamp.BitstampExchange;
-import com.xeiam.xchange.currency.Currencies;
 import com.xeiam.xchange.dto.Order;
 import com.xeiam.xchange.dto.marketdata.Trade;
-import com.xeiam.xchange.dto.marketdata.Trades;
 import com.xeiam.xchange.dto.trade.MarketOrder;
-import com.xeiam.xchange.service.polling.PollingMarketDataService;
 import eu.verdelhan.bitraac.algorithms.TradingAlgorithm;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import eu.verdelhan.bitraac.data.ExchangeMarket;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.joda.money.BigMoney;
-import org.joda.money.CurrencyUnit;
 
 public class AlgorithmComparator {
-
-	private static final Exchange EXCHANGE = ExchangeFactory.INSTANCE.createExchange(BitstampExchange.class.getName());
-	private PollingMarketDataService marketDataService = EXCHANGE.getPollingMarketDataService();
 
 	private BigDecimal initialUsdBalance;
 	private BigDecimal initialBtcBalance;
@@ -60,7 +42,7 @@ public class AlgorithmComparator {
 			BigDecimal btcUsd = null;
 			currentUsdBalance = initialUsdBalance;
 			currentBtcBalance = initialBtcBalance;
-			for (Trade trade : getLocalTrades()) {
+			for (Trade trade : ExchangeMarket.getAllTrades()) {
 				//System.out.println("balance: USD=" + currentUsdBalance + " BTC="+ currentBtcBalance);
 				algorithm.addTrade(trade);
 				processMarketOrder((MarketOrder) algorithm.placeOrder(), trade);
@@ -74,20 +56,6 @@ public class AlgorithmComparator {
 //		ComparativeChart.show();
     }
 
-	public void dumpBitstampData() {
-		try
-		{
-			Trades trades = marketDataService.getTrades(Currencies.BTC, Currencies.USD);
-			for (Trade t : trades.getTrades()) {
-				System.out.println(t);
-			}
-		}
-		catch (IOException ex)
-		{
-			Logger.getLogger(AlgorithmComparator.class.getName()).log(Level.SEVERE, null, ex);
-		}
-	}
-
 	/**
 	 * @param currentBtcUsd the current BTC/USD rate
 	 * @return the overall earnings (can be negative in case of loss) in USD
@@ -97,25 +65,6 @@ public class AlgorithmComparator {
 		BigDecimal btcDifference = currentBtcBalance.subtract(initialBtcBalance);
 		return usdDifference.add(btcDifference.multiply(currentBtcUsd)).doubleValue();
 	}
-
-    public static ArrayList<Trade> getLocalTrades() {
-        ArrayList<Trade> trades = new ArrayList<Trade>();
-        try {
-            BufferedReader fileReader = new BufferedReader(new InputStreamReader(AlgorithmComparator.class.getClassLoader().getResourceAsStream("bitstamp_usd.0.csv")));
-            CSVReader csvReader = new CSVReader(fileReader, ',');
-            String[] line;
-            while ((line = csvReader.readNext()) != null) {
-                Date timestamp = new Date(Long.parseLong(line[0]) * 1000);
-                BigMoney price = BigMoney.of(CurrencyUnit.USD, new BigDecimal(line[1]));
-                BigDecimal tradableAmount = new BigDecimal(line[2]);
-                Trade trade = new Trade(null, tradableAmount, Currencies.BTC, Currencies.USD, price, timestamp, 0);
-                trades.add(trade);
-            }
-        } catch (IOException ioe) {
-            Logger.getLogger(AlgorithmComparator.class.getName()).log(Level.SEVERE, "Unable to load trades from CSV", ioe);
-        }
-        return trades;
-    }
 
 	/**
 	 * Process a market order.
