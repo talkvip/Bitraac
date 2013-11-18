@@ -5,7 +5,9 @@ import eu.verdelhan.bitraac.data.ExchangeMarket;
 import eu.verdelhan.bitraac.data.Period;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.Date;
+import org.joda.money.BigMoney;
 
 /**
  * See:
@@ -15,21 +17,27 @@ import java.util.Date;
 public class Overlays {
 
 	/**
-	 * @param lastValues the number of values to use (i.e. the n last values)
+	 * @param periods the list of periods
+	 * @param lastPeriods the number of periods to use (i.e. the n last periods)
 	 * @return the moving average price of trades
 	 */
-    public static BigDecimal getSimpleMovingAverage(int lastValues) {
-        int nbValues = ExchangeMarket.getAllTrades().size();
-        if (lastValues >= nbValues) {
-            throw new IllegalArgumentException("Not enough values");
+    public static BigDecimal getSimpleMovingAverage(ArrayList<Period> periods, int lastPeriods) {
+        int nbPeriods = periods.size();
+        if (lastPeriods >= nbPeriods) {
+            throw new IllegalArgumentException("Not enough periods");
         }
 
         BigDecimal average = new BigDecimal(0);
-        int firstValueIndex = (nbValues - lastValues) > 0 ? nbValues - lastValues : 0;
-        for (int i = firstValueIndex; i < nbValues; i++) {
-            average = average.add(ExchangeMarket.getAllTrades().get(i).getPrice().getAmount());
+        int firstValueIndex = (nbPeriods - lastPeriods) > 0 ? nbPeriods - lastPeriods : 0;
+        for (int i = firstValueIndex; i < nbPeriods; i++) {
+			BigMoney periodLastPrice = periods.get(i).getLast();
+			if (periodLastPrice == null) {
+				lastPeriods--;
+			} else {
+				average = average.add(periods.get(i).getLast().getAmount());
+			}
         }
-        return average.divide(new BigDecimal(lastValues), RoundingMode.HALF_UP);
+        return average.divide(new BigDecimal(lastPeriods), RoundingMode.HALF_UP);
     }
 
 	/**

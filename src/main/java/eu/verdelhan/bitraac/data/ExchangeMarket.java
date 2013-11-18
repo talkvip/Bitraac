@@ -105,6 +105,18 @@ public class ExchangeMarket {
         } catch (IOException ioe) {
             Logger.getLogger(AlgorithmComparator.class.getName()).log(Level.SEVERE, "Unable to load trades from CSV", ioe);
         }
+
+		if (!trades.isEmpty()) {
+			// /!\ Performance patch /!\
+			// Only keeping the last 7 days
+			Trade lastTrade = trades.get(trades.size()-1);
+			Date firstDateKept = new Date(lastTrade.getTimestamp().getTime() - TimeUnit.DAYS.toMillis(7));
+			for (int i = trades.size() - 1; i >= 0; i--) {
+				if (trades.get(i).getTimestamp().before(firstDateKept)) {
+					trades.remove(i);
+				}
+			}
+		}
         return trades;
     }
 

@@ -5,9 +5,14 @@ import com.xeiam.xchange.dto.Order;
 import com.xeiam.xchange.dto.trade.MarketOrder;
 import eu.verdelhan.bitraac.Overlays;
 import eu.verdelhan.bitraac.algorithms.TradingAlgorithm;
+import eu.verdelhan.bitraac.data.ExchangeMarket;
+import eu.verdelhan.bitraac.data.Period;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 
 public class SimpleMovingAveragesAlgorithm extends TradingAlgorithm {
+
+	private ArrayList<Period> tradesByPeriods = ExchangeMarket.getTradesByPeriod(60);
 
     @Override
     public boolean isEnoughTrades() {
@@ -34,8 +39,8 @@ public class SimpleMovingAveragesAlgorithm extends TradingAlgorithm {
     private double getTrendCoef() {
         double trendCoef = 1.0;
         if (isEnoughTrades()) {
-            double movingAvg25 = Overlays.getSimpleMovingAverage(25).doubleValue();
-            double movingAvg10 = Overlays.getSimpleMovingAverage(10).doubleValue();
+            double movingAvg25 = Overlays.getSimpleMovingAverage(tradesByPeriods, 25).doubleValue();
+            double movingAvg10 = Overlays.getSimpleMovingAverage(tradesByPeriods, 10).doubleValue();
             trendCoef = movingAvg10 / movingAvg25;
         }
         return trendCoef;
