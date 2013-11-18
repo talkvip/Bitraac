@@ -2,7 +2,10 @@
 
 ... for **Bit**coin **Tra**ding **A**lgorithms **C**omparator.
 
-See the [algorithmic trading strategies](http://en.wikipedia.org/wiki/Algorithmic_trading#Strategies).
+See also:
+
+  * [Algorithmic trading strategies](http://en.wikipedia.org/wiki/Algorithmic_trading#Strategies)
+  * [Technical indicators and overlays](http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators)
 
 ## Current restrictions
 
