@@ -7,7 +7,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Date;
-import org.joda.money.BigMoney;
 
 /**
  * See:
@@ -19,7 +18,7 @@ public class Overlays {
 	/**
 	 * @param periods the list of periods
 	 * @param lastPeriods the number of periods to use (i.e. the n last periods)
-	 * @return the moving average price of trades
+	 * @return the simple moving average price of trades
 	 */
     public static BigDecimal getSimpleMovingAverage(ArrayList<Period> periods, int lastPeriods) {
         int nbPeriods = periods.size();
@@ -30,15 +29,26 @@ public class Overlays {
         BigDecimal average = new BigDecimal(0);
         int firstValueIndex = (nbPeriods - lastPeriods) > 0 ? nbPeriods - lastPeriods : 0;
         for (int i = firstValueIndex; i < nbPeriods; i++) {
-			BigMoney periodLastPrice = periods.get(i).getLast();
-			if (periodLastPrice == null) {
+			Trade periodLastTrade = periods.get(i).getLast();
+			if (periodLastTrade == null) {
+				// No trade in the period
 				lastPeriods--;
 			} else {
-				average = average.add(periods.get(i).getLast().getAmount());
+				average = average.add(periodLastTrade.getPrice().getAmount());
 			}
         }
         return average.divide(new BigDecimal(lastPeriods), RoundingMode.HALF_UP);
     }
+
+	/**
+	 * @param periods the list of periods
+	 * @param lastPeriods the number of periods to use (i.e. the n last periods)
+	 * @return the exponential moving average price of trades
+	 */
+    public static BigDecimal getExponentialMovingAverage(ArrayList<Period> periods, int lastPeriods) {
+		// TO DO
+        return null;
+	}
 
 	/**
 	 * @param period the period for which we want the trade volume

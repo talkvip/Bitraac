@@ -37,6 +37,9 @@ public class AlgorithmComparator {
 		this.transactionFee = transactionFee;
 	}
 
+	/**
+	 * @param algorithms the algorithms to be compared
+	 */
     public void compare(TradingAlgorithm... algorithms) {
         for (TradingAlgorithm algorithm : algorithms) {
 			BigDecimal btcUsd = null;

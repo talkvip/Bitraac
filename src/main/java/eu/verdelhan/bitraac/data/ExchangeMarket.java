@@ -87,6 +87,7 @@ public class ExchangeMarket {
 	}
 
 	/**
+	 * (Keeps only the last 7 days.)
 	 * @return the local (i.e. CSV-based) trades
 	 */
     private static ArrayList<Trade> getLocalTrades() {
