@@ -103,6 +103,25 @@ public class Indicators {
 	}
 
 	/**
+	 * Aka. Momentum
+	 * The ROC calculation compares the current price with the price "n" periods ago.
+	 * @param periods the list of periods
+	 * @param n the current price will be compared with the price "n" (e.g. 12) periods ago
+	 * @return the rate of change (ROC)
+	 */
+	public static BigDecimal getRateOfChange(ArrayList<Period> periods, int n) {
+		int nbPeriods = periods.size();
+        if (n > nbPeriods) {
+            throw new IllegalArgumentException("Not enough periods");
+        }
+
+		BigDecimal nPeriodsAgoClosePrice = periods.get(nbPeriods - 1 - n).getLast().getPrice().getAmount();
+		BigDecimal currentClosePrice = periods.get(nbPeriods - 1).getLast().getPrice().getAmount();
+
+		return currentClosePrice.subtract(nPeriodsAgoClosePrice).divide(nPeriodsAgoClosePrice, RoundingMode.HALF_UP).multiply(new BigDecimal(100));
+	}
+
+	/**
 	 * @param periods the list of periods
 	 * @param lastPeriods the number of periods to use (i.e. the n last periods) (e.g. 14)
 	 * @return the relative strength index (RSI)
