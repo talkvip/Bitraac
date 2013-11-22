@@ -15,11 +15,11 @@ import java.util.Date;
  */
 public class Overlays {
 
-	/**
-	 * @param periods the list of periods
-	 * @param lastPeriods the number of periods to use (i.e. the n last periods)
-	 * @return the simple moving average price of trades
-	 */
+    /**
+     * @param periods the list of periods
+     * @param lastPeriods the number of periods to use (i.e. the n last periods)
+     * @return the simple moving average price of trades
+     */
     public static BigDecimal getSimpleMovingAverage(ArrayList<Period> periods, int lastPeriods) {
         int nbPeriods = periods.size();
         if (lastPeriods > nbPeriods) {
@@ -29,50 +29,50 @@ public class Overlays {
         BigDecimal average = new BigDecimal(0);
         int firstPeriodIdx = (nbPeriods - lastPeriods) > 0 ? nbPeriods - lastPeriods : 0;
         for (int i = firstPeriodIdx; i < nbPeriods; i++) {
-			Trade periodLastTrade = periods.get(i).getLast();
-			if (periodLastTrade == null) {
-				// No trade in the period
-				lastPeriods--;
-			} else {
-				average = average.add(periodLastTrade.getPrice().getAmount());
-			}
+            Trade periodLastTrade = periods.get(i).getLast();
+            if (periodLastTrade == null) {
+                // No trade in the period
+                lastPeriods--;
+            } else {
+                average = average.add(periodLastTrade.getPrice().getAmount());
+            }
         }
         return average.divide(new BigDecimal(lastPeriods), RoundingMode.HALF_UP);
     }
 
-	/**
-	 * @param periods the list of periods
-	 * @param lastPeriods the number of periods to use (i.e. the n last periods)
-	 * @return the exponential moving average price of trades
-	 */
+    /**
+     * @param periods the list of periods
+     * @param lastPeriods the number of periods to use (i.e. the n last periods)
+     * @return the exponential moving average price of trades
+     */
     public static BigDecimal getExponentialMovingAverage(ArrayList<Period> periods, int lastPeriods) {
-		// TO DO
+        // TO DO
         return null;
-	}
+    }
 
-	/**
-	 * @param period the period for which we want the trade volume
-	 * @return the trade volume during the period
-	 */
-	public static BigDecimal getVolume(Period period) {
-		BigDecimal volume = BigDecimal.ZERO;
-		for (Trade trade : period.getTrades()) {
-			volume = volume.add(trade.getPrice().getAmount());
-		}
-		return volume;
-	}
+    /**
+     * @param period the period for which we want the trade volume
+     * @return the trade volume during the period
+     */
+    public static BigDecimal getVolume(Period period) {
+        BigDecimal volume = BigDecimal.ZERO;
+        for (Trade trade : period.getTrades()) {
+            volume = volume.add(trade.getPrice().getAmount());
+        }
+        return volume;
+    }
 
-	/**
-	 * @param timestamp the date for which we want the trade volume
-	 * @return the trade volume at timestamp
-	 */
-	public static BigDecimal getVolume(Date timestamp) {
-		BigDecimal volume = BigDecimal.ZERO;
-		for (Trade trade : ExchangeMarket.getAllTrades()) {
-			if (timestamp.equals(trade.getTimestamp())) {
-				volume = volume.add(trade.getPrice().getAmount());
-			}
-		}
-		return volume;
-	}
+    /**
+     * @param timestamp the date for which we want the trade volume
+     * @return the trade volume at timestamp
+     */
+    public static BigDecimal getVolume(Date timestamp) {
+        BigDecimal volume = BigDecimal.ZERO;
+        for (Trade trade : ExchangeMarket.getAllTrades()) {
+            if (timestamp.equals(trade.getTimestamp())) {
+                volume = volume.add(trade.getPrice().getAmount());
+            }
+        }
+        return volume;
+    }
 }

@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 public class SimpleMovingAveragesAlgorithm extends TradingAlgorithm {
 
-	private ArrayList<Period> tradesByPeriods = ExchangeMarket.getTradesByPeriod(60);
+    private ArrayList<Period> tradesByPeriods = ExchangeMarket.getTradesByPeriod(60);
 
     @Override
     public boolean isEnoughTrades() {

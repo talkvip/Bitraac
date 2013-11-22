@@ -26,70 +26,70 @@ import org.joda.money.CurrencyUnit;
  */
 public class ExchangeMarket {
 
-	private static final Exchange EXCHANGE = ExchangeFactory.INSTANCE.createExchange(BitstampExchange.class.getName());
-	private static PollingMarketDataService marketDataService = EXCHANGE.getPollingMarketDataService();
+    private static final Exchange EXCHANGE = ExchangeFactory.INSTANCE.createExchange(BitstampExchange.class.getName());
+    private static PollingMarketDataService marketDataService = EXCHANGE.getPollingMarketDataService();
 
-	private static final ArrayList<Trade> TRADES = getLocalTrades();
+    private static final ArrayList<Trade> TRADES = getLocalTrades();
 
-	/**
-	 * @return the trades
-	 */
-	public static ArrayList<Trade> getAllTrades() {
-		return TRADES;
-	}
+    /**
+     * @return the trades
+     */
+    public static ArrayList<Trade> getAllTrades() {
+        return TRADES;
+    }
 
-	/**
-	 * @param duration the duration (in seconds) of each periods
-	 * @return the periods with their trades
-	 */
-	public static ArrayList<Period> getTradesByPeriod(int duration) {
-		ArrayList<Period> periods = new ArrayList<Period>(1000);
+    /**
+     * @param duration the duration (in seconds) of each periods
+     * @return the periods with their trades
+     */
+    public static ArrayList<Period> getTradesByPeriod(int duration) {
+        ArrayList<Period> periods = new ArrayList<Period>(1000);
 
-		// Building the list of periods
-		Date firstTradeDate = TRADES.get(0).getTimestamp();
-		Date lastTradeDate = TRADES.get(TRADES.size()-1).getTimestamp();
-		Date periodStartDate = firstTradeDate;
-		while (!periodStartDate.after(lastTradeDate)) {
-			Date periodEndDate = new Date(periodStartDate.getTime() + TimeUnit.SECONDS.toMillis(duration));
-			periods.add(new Period(periodStartDate, periodEndDate));
-			periodStartDate = periodEndDate;
-		}
+        // Building the list of periods
+        Date firstTradeDate = TRADES.get(0).getTimestamp();
+        Date lastTradeDate = TRADES.get(TRADES.size()-1).getTimestamp();
+        Date periodStartDate = firstTradeDate;
+        while (!periodStartDate.after(lastTradeDate)) {
+            Date periodEndDate = new Date(periodStartDate.getTime() + TimeUnit.SECONDS.toMillis(duration));
+            periods.add(new Period(periodStartDate, periodEndDate));
+            periodStartDate = periodEndDate;
+        }
 
-		// Adding trades for each period
-		for (Trade trade : TRADES) {
-			Date tradeDate = trade.getTimestamp();
-			for (Period period : periods) {
-				if (period.inPeriod(tradeDate)) {
-					period.addTrade(trade);
-					break;
-				}
-			}
-		}
+        // Adding trades for each period
+        for (Trade trade : TRADES) {
+            Date tradeDate = trade.getTimestamp();
+            for (Period period : periods) {
+                if (period.inPeriod(tradeDate)) {
+                    period.addTrade(trade);
+                    break;
+                }
+            }
+        }
 
-		return periods;
-	}
+        return periods;
+    }
 
-	/**
-	 * Dump Bitstamp trades.
-	 */
-	public static void dumpBitstampData() {
-		try
-		{
-			Trades trades = marketDataService.getTrades(Currencies.BTC, Currencies.USD);
-			for (Trade t : trades.getTrades()) {
-				System.out.println(t);
-			}
-		}
-		catch (IOException ex)
-		{
-			Logger.getLogger(AlgorithmComparator.class.getName()).log(Level.SEVERE, null, ex);
-		}
-	}
+    /**
+     * Dump Bitstamp trades.
+     */
+    public static void dumpBitstampData() {
+        try
+        {
+            Trades trades = marketDataService.getTrades(Currencies.BTC, Currencies.USD);
+            for (Trade t : trades.getTrades()) {
+                System.out.println(t);
+            }
+        }
+        catch (IOException ex)
+        {
+            Logger.getLogger(AlgorithmComparator.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 
-	/**
-	 * (Keeps only the last 7 days.)
-	 * @return the local (i.e. CSV-based) trades
-	 */
+    /**
+     * (Keeps only the last 7 days.)
+     * @return the local (i.e. CSV-based) trades
+     */
     private static ArrayList<Trade> getLocalTrades() {
         ArrayList<Trade> trades = new ArrayList<Trade>();
         try {
@@ -107,17 +107,17 @@ public class ExchangeMarket {
             Logger.getLogger(AlgorithmComparator.class.getName()).log(Level.SEVERE, "Unable to load trades from CSV", ioe);
         }
 
-		if (!trades.isEmpty()) {
-			// /!\ Performance patch /!\
-			// Only keeping the last 7 days
-			Trade lastTrade = trades.get(trades.size()-1);
-			Date firstDateKept = new Date(lastTrade.getTimestamp().getTime() - TimeUnit.DAYS.toMillis(7));
-			for (int i = trades.size() - 1; i >= 0; i--) {
-				if (trades.get(i).getTimestamp().before(firstDateKept)) {
-					trades.remove(i);
-				}
-			}
-		}
+        if (!trades.isEmpty()) {
+            // /!\ Performance patch /!\
+            // Only keeping the last 7 days
+            Trade lastTrade = trades.get(trades.size()-1);
+            Date firstDateKept = new Date(lastTrade.getTimestamp().getTime() - TimeUnit.DAYS.toMillis(7));
+            for (int i = trades.size() - 1; i >= 0; i--) {
+                if (trades.get(i).getTimestamp().before(firstDateKept)) {
+                    trades.remove(i);
+                }
+            }
+        }
         return trades;
     }
 
