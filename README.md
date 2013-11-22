@@ -13,6 +13,7 @@ See also:
 
   * No transaction fees
   * No limit orders
+  * Not enough overlays or indicators
   * No more than a few algorithms
   * No streaming data
   * No influence on exchange rate
