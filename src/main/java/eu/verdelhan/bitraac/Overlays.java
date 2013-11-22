@@ -27,8 +27,8 @@ public class Overlays {
         }
 
         BigDecimal average = new BigDecimal(0);
-        int firstValueIndex = (nbPeriods - lastPeriods) > 0 ? nbPeriods - lastPeriods : 0;
-        for (int i = firstValueIndex; i < nbPeriods; i++) {
+        int firstPeriodIdx = (nbPeriods - lastPeriods) > 0 ? nbPeriods - lastPeriods : 0;
+        for (int i = firstPeriodIdx; i < nbPeriods; i++) {
 			Trade periodLastTrade = periods.get(i).getLast();
 			if (periodLastTrade == null) {
 				// No trade in the period

@@ -2,6 +2,7 @@ package eu.verdelhan.bitraac;
 
 import eu.verdelhan.bitraac.data.Period;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import org.joda.money.BigMoney;
 
@@ -26,7 +27,9 @@ public class Indicators {
 		// Getting the number of periods since the high price
 		Period highPeriod = null;
 		int nbPeriodsSinceHigh = 0;
-		for (Period period : periods) {
+		int firstPeriodIdx = (nbPeriods - lastPeriods) > 0 ? nbPeriods - lastPeriods : 0;
+        for (int i = firstPeriodIdx; i < nbPeriods; i++) {
+			Period period  = periods.get(i);
 			if (highPeriod == null) {
 				highPeriod = period;
 			} else {
@@ -59,7 +62,9 @@ public class Indicators {
 		// Getting the number of periods since the low price
 		Period lowPeriod = null;
 		int nbPeriodsSinceLow = 0;
-		for (Period period : periods) {
+		int firstPeriodIdx = (nbPeriods - lastPeriods) > 0 ? nbPeriods - lastPeriods : 0;
+        for (int i = firstPeriodIdx; i < nbPeriods; i++) {
+			Period period  = periods.get(i);
 			if (lowPeriod == null) {
 				lowPeriod = period;
 			} else {
@@ -80,8 +85,8 @@ public class Indicators {
 
 	/**
 	 * @param periods the list of periods
-	 * @param shortTermEmaNbPeriods the number of periods to use (i.e. the n last periods) for short term EMA computation
-	 * @param longTermEmaNbPeriods the number of periods to use (i.e. the n last periods) for long term EMA computation
+	 * @param shortTermEmaNbPeriods the number of periods to use (i.e. the n last periods) for short term EMA computation (e.g. 12)
+	 * @param longTermEmaNbPeriods the number of periods to use (i.e. the n last periods) for long term EMA computation (e.g. 26)
 	 * @return the MACD indicator
 	 */
 	public static BigDecimal getMacd(ArrayList<Period> periods, int shortTermEmaNbPeriods, int longTermEmaNbPeriods) {
@@ -95,5 +100,78 @@ public class Indicators {
 		BigDecimal longTermEma = Overlays.getExponentialMovingAverage(periods, longTermEmaNbPeriods);
 
 		return shortTermEma.subtract(longTermEma);
+	}
+
+	/**
+	 * @param periods the list of periods
+	 * @param lastPeriods the number of periods to use (i.e. the n last periods) (e.g. 14)
+	 * @return the relative strength index (RSI)
+	 */
+	public static BigDecimal getRelativeStrengthIndex(ArrayList<Period> periods, int lastPeriods) {
+		int nbPeriods = periods.size();
+        if (lastPeriods > nbPeriods) {
+            throw new IllegalArgumentException("Not enough periods");
+        }
+		lastPeriods = (nbPeriods - lastPeriods) > 0 ? lastPeriods : nbPeriods;
+
+		// Computing gains and losses
+		ArrayList<BigDecimal> gains = new ArrayList<BigDecimal>();
+		gains.add(BigDecimal.ZERO);
+		ArrayList<BigDecimal> losses = new ArrayList<BigDecimal>();
+		losses.add(BigDecimal.ZERO);
+		int firstPeriodIdx = nbPeriods - lastPeriods;
+        for (int i = firstPeriodIdx + 1; i < lastPeriods; i++) {
+			Period previousPeriod  = periods.get(i - 1);
+			Period currentPeriod  = periods.get(i);
+			BigMoney previousClosePrice = previousPeriod.getLast().getPrice();
+			BigMoney currentClosePrice = currentPeriod.getLast().getPrice();
+
+			if (previousClosePrice.isLessThan(currentClosePrice)) {
+				// Gain
+				gains.add(currentClosePrice.getAmount().subtract(previousClosePrice.getAmount()));
+				losses.add(BigDecimal.ZERO);
+			} else if (previousClosePrice.isGreaterThan(currentClosePrice)) {
+				// Loss
+				gains.add(BigDecimal.ZERO);
+				losses.add(previousClosePrice.getAmount().subtract(currentClosePrice.getAmount()));
+			} else {
+				// Neither gain nor loss
+				gains.add(BigDecimal.ZERO);
+				losses.add(BigDecimal.ZERO);
+			}
+		}
+
+		// Sums of gains and losses
+		BigDecimal sumOfGains = BigDecimal.ZERO;
+		BigDecimal sumOfLosses = BigDecimal.ZERO;
+		for (int i = 0; i < gains.size(); i++) {
+			sumOfGains = sumOfGains.add(gains.get(i));
+			sumOfLosses = sumOfLosses.add(losses.get(i));
+		}
+
+		// Computing average gains and average losses
+		ArrayList<BigDecimal> averageGains = new ArrayList<BigDecimal>();
+		ArrayList<BigDecimal> averageLosses = new ArrayList<BigDecimal>();
+		BigDecimal nbPeriodsDivider = new BigDecimal(lastPeriods);
+		BigDecimal nbPeriodsMinusOne = nbPeriodsDivider.subtract(BigDecimal.ONE);
+
+		// First average gain and first average loss
+		averageGains.add(sumOfGains.divide(nbPeriodsDivider, RoundingMode.HALF_UP));
+		averageLosses.add(sumOfLosses.divide(nbPeriodsDivider, RoundingMode.HALF_UP));
+		// Subsequent "average gain" and "average loss" values
+		for (int i = firstPeriodIdx + 1; i < lastPeriods; i++) {
+			BigDecimal previousAverageGain = averageGains.get(i - 1);
+			BigDecimal previousAverageLoss = averageLosses.get(i - 1);
+			averageGains.add(previousAverageGain.multiply(nbPeriodsMinusOne).add(gains.get(i)).divide(nbPeriodsDivider, RoundingMode.HALF_UP));
+			averageLosses.add(previousAverageLoss.multiply(nbPeriodsMinusOne).add(losses.get(i)).divide(nbPeriodsDivider, RoundingMode.HALF_UP));
+		}
+
+		// Relative strength
+		BigDecimal relativeStrength = averageGains.get(lastPeriods - 1).divide(averageLosses.get(lastPeriods - 1), RoundingMode.HALF_UP);
+
+		// Relative strength index
+		BigDecimal hundred = new BigDecimal(100);
+		BigDecimal rsi = hundred.subtract(hundred.divide(relativeStrength.add(BigDecimal.ONE), RoundingMode.HALF_UP));
+		return rsi;
 	}
 }
