@@ -22,7 +22,7 @@ public class Overlays {
 	 */
     public static BigDecimal getSimpleMovingAverage(ArrayList<Period> periods, int lastPeriods) {
         int nbPeriods = periods.size();
-        if (lastPeriods >= nbPeriods) {
+        if (lastPeriods > nbPeriods) {
             throw new IllegalArgumentException("Not enough periods");
         }
 
