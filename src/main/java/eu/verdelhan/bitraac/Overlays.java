@@ -46,8 +46,24 @@ public class Overlays {
      * @return the exponential moving average price of trades
      */
     public static BigDecimal getExponentialMovingAverage(ArrayList<Period> periods, int lastPeriods) {
-        // TO DO
-        return null;
+        int nbPeriods = periods.size();
+        if (lastPeriods > nbPeriods) {
+            throw new IllegalArgumentException("Not enough periods");
+        }
+        lastPeriods = (nbPeriods - lastPeriods) > 0 ? lastPeriods : nbPeriods;
+        
+        BigDecimal multiplier = new BigDecimal((double) (2 / ((double) lastPeriods + 1))); // Weighting multiplier
+
+        // Computing EMAs
+        int firstPeriodIdx = nbPeriods - lastPeriods;
+        // An exponential moving average (EMA) has to start somewhere
+        // so a simple moving average is used as the previous period's EMA in the first calculation.
+        BigDecimal ema = getSimpleMovingAverage(periods, lastPeriods);
+        for (int i = firstPeriodIdx + 1; i < lastPeriods; i++) {
+            BigDecimal closePrice = periods.get(i).getLast().getPrice().getAmount();
+            ema = closePrice.subtract(ema).multiply(multiplier).add(ema);
+        }
+        return ema;
     }
 
     /**
