@@ -1,8 +1,10 @@
 package eu.verdelhan.bitraac.data;
 
 import com.xeiam.xchange.dto.marketdata.Trade;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Date;
+import org.joda.money.BigMoney;
 
 /**
  * A period of time.
@@ -81,5 +83,17 @@ public class Period {
      */
     public Trade getLast() {
         return ((trades == null) || trades.isEmpty()) ? null : trades.get(trades.size()-1);
+    }
+
+    /**
+     * Aka. pivot point.
+     * (H + L + C) / 3
+     * @return the typical price
+     */
+    public BigMoney getTypicalPrice() {
+        BigMoney high = getHigh().getPrice();
+        BigMoney low = getLow().getPrice();
+        BigMoney close = getLast().getPrice();
+        return high.plus(low).plus(close).dividedBy(3, RoundingMode.HALF_UP);
     }
 }
