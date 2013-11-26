@@ -13,6 +13,18 @@ import org.joda.money.BigMoney;
  */
 public class Indicators {
 
+    private static final BigDecimal HUNDRED = new BigDecimal(100);
+
+    /**
+     * @param periods the list of periods
+     * @param lastPeriods the number of periods to use (i.e. the n last periods)
+     * @return the ADL indicator
+     */
+    public static double getAccumulationDistributionLine(ArrayList<Period> periods, int lastPeriods) {
+        // TO DO
+        return 0;
+    }
+
     /**
      * @param periods the list of periods
      * @param lastPeriods the number of periods to use (i.e. the n last periods)
@@ -101,6 +113,55 @@ public class Indicators {
 
         return shortTermEma.subtract(longTermEma);
     }
+    
+    /**
+     * @param periods the list of periods
+     * @param lastPeriods the number of periods to use (i.e. the n last periods) (e.g. 20)
+     * @return the mean deviation
+     */
+    public static BigDecimal getMeanDeviation(ArrayList<Period> periods, int lastPeriods) {
+        int nbPeriods = periods.size();
+        if (lastPeriods > nbPeriods) {
+            throw new IllegalArgumentException("Not enough periods");
+        }
+        
+        // TO DO
+        return null;
+    }
+    
+    /**
+     * @param periods the list of periods
+     * @param lastPeriods the number of periods to use (i.e. the n last periods) (e.g. 14)
+     * @return the money flow index (MFI)
+     */
+    public static BigDecimal getMoneyFlowIndex(ArrayList<Period> periods, int lastPeriods) {
+        int nbPeriods = periods.size();
+        if (lastPeriods > nbPeriods) {
+            throw new IllegalArgumentException("Not enough periods");
+        }
+        
+        // TO DO
+        return null;
+    }
+
+    /**
+     * @param periods the list of periods
+     * @param shortTermEmaNbPeriods the number of periods to use (i.e. the n last periods) for short term EMA computation (e.g. 12)
+     * @param longTermEmaNbPeriods the number of periods to use (i.e. the n last periods) for long term EMA computation (e.g. 26)
+     * @return the PPO indicator (in percentage terms, i.e. between 0 and 100)
+     */
+    public static BigDecimal getPercentagePriceOscillator(ArrayList<Period> periods, int shortTermEmaNbPeriods, int longTermEmaNbPeriods) {
+        int nbPeriods = periods.size();
+        if (longTermEmaNbPeriods > nbPeriods) {
+            throw new IllegalArgumentException("Not enough periods");
+        }
+
+        // Computing exponential moving averages
+        BigDecimal shortTermEma = Overlays.getExponentialMovingAverage(periods, shortTermEmaNbPeriods);
+        BigDecimal longTermEma = Overlays.getExponentialMovingAverage(periods, longTermEmaNbPeriods);
+
+        return shortTermEma.subtract(longTermEma).divide(longTermEma, RoundingMode.HALF_UP).multiply(HUNDRED);
+    }
 
     /**
      * Aka. Momentum
@@ -118,7 +179,7 @@ public class Indicators {
         BigDecimal nPeriodsAgoClosePrice = periods.get(nbPeriods - 1 - n).getLast().getPrice().getAmount();
         BigDecimal currentClosePrice = periods.get(nbPeriods - 1).getLast().getPrice().getAmount();
 
-        return currentClosePrice.subtract(nPeriodsAgoClosePrice).divide(nPeriodsAgoClosePrice, RoundingMode.HALF_UP).multiply(new BigDecimal(100));
+        return currentClosePrice.subtract(nPeriodsAgoClosePrice).divide(nPeriodsAgoClosePrice, RoundingMode.HALF_UP).multiply(HUNDRED);
     }
 
     /**
@@ -189,8 +250,7 @@ public class Indicators {
         BigDecimal relativeStrength = averageGains.get(lastPeriods - 1).divide(averageLosses.get(lastPeriods - 1), RoundingMode.HALF_UP);
 
         // Relative strength index
-        BigDecimal hundred = new BigDecimal(100);
-        BigDecimal rsi = hundred.subtract(hundred.divide(relativeStrength.add(BigDecimal.ONE), RoundingMode.HALF_UP));
+        BigDecimal rsi = HUNDRED.subtract(HUNDRED.divide(relativeStrength.add(BigDecimal.ONE), RoundingMode.HALF_UP));
         return rsi;
     }
 }
