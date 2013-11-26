@@ -8,10 +8,9 @@ public class Comparison {
 
         AlgorithmComparator ac = new AlgorithmComparator(1000, 0.5);
         ac.compare(new NoAlgorithmAlgorithm(),
-                new DummyBinaryAlgorithm(),
-                new EnhancedBinaryAlgorithm(),
+                new BinaryAlgorithm(),
                 new SimpleMovingAveragesAlgorithm(),
-                new ExponentialMovingAveragesAlgorithm());
+                new PPOAlgorithm());
 
     }
 }

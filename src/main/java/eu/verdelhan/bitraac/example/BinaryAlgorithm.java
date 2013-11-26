@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 
-public class EnhancedBinaryAlgorithm extends TradingAlgorithm {
+public class BinaryAlgorithm extends TradingAlgorithm {
 
     @Override
     public boolean isEnoughTrades() {
