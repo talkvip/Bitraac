@@ -4,6 +4,7 @@ import com.xeiam.xchange.dto.Order;
 import com.xeiam.xchange.dto.marketdata.Trade;
 import com.xeiam.xchange.dto.trade.MarketOrder;
 import eu.verdelhan.bitraac.algorithms.TradingAlgorithm;
+import eu.verdelhan.bitraac.data.ExchangeAccount;
 import eu.verdelhan.bitraac.data.ExchangeMarket;
 import java.math.BigDecimal;
 
@@ -13,8 +14,7 @@ public class AlgorithmComparator {
     private BigDecimal initialBtcBalance;
     private double transactionFee;
 
-    private BigDecimal currentUsdBalance;
-    private BigDecimal currentBtcBalance;
+    private ExchangeAccount account;
 
     /**
      * @param initialUsdBalance the initial USD balance
@@ -43,30 +43,16 @@ public class AlgorithmComparator {
     public void compare(TradingAlgorithm... algorithms) {
         for (TradingAlgorithm algorithm : algorithms) {
             BigDecimal btcUsd = null;
-            currentUsdBalance = initialUsdBalance;
-            currentBtcBalance = initialBtcBalance;
+            account = new ExchangeAccount(initialUsdBalance, initialBtcBalance);
             for (Trade trade : ExchangeMarket.getAllTrades()) {
-                //System.out.println("balance: USD=" + currentUsdBalance + " BTC="+ currentBtcBalance);
                 algorithm.addTrade(trade);
                 processMarketOrder((MarketOrder) algorithm.placeOrder(), trade);
                 btcUsd = trade.getPrice().getAmount();
             }
-            System.out.println("************");
-            System.out.println("Result (assets): $" + getOverallEarnings(btcUsd));
-            System.out.println("************");
+            System.out.println("Assets ("+algorithm.getClass().getSimpleName()+"): $" + account.getOverallEarnings(btcUsd));
         }
 //        ComparativeChart.addTradeSeries("trades", getLocalTrades());
 //        ComparativeChart.show();
-    }
-
-    /**
-     * @param currentBtcUsd the current BTC/USD rate
-     * @return the overall earnings (can be negative in case of loss) in USD
-     */
-    public double getOverallEarnings(BigDecimal currentBtcUsd) {
-        BigDecimal usdDifference = currentUsdBalance.subtract(initialUsdBalance);
-        BigDecimal btcDifference = currentBtcBalance.subtract(initialBtcBalance);
-        return usdDifference.add(btcDifference.multiply(currentBtcUsd)).doubleValue();
     }
 
     /**
@@ -78,40 +64,15 @@ public class AlgorithmComparator {
         if (order != null) {
             if (order.getType() == Order.OrderType.BID) {
                 // Buy
-                if (isEnoughUsd(order, lastTrade)) {
-                    currentUsdBalance = currentUsdBalance.subtract(order.getTradableAmount().multiply(lastTrade.getPrice().getAmount()));
-                    currentBtcBalance = currentBtcBalance.add(order.getTradableAmount());
+                if (account.isEnoughUsd(order, lastTrade)) {
+                    account.buy(order.getTradableAmount(), lastTrade.getPrice());
                 }
             } else if (order.getType() == Order.OrderType.ASK) {
                 // Sell
-                if (isEnoughBtc(order)) {
-                    currentBtcBalance = currentBtcBalance.subtract(order.getTradableAmount());
-                    currentUsdBalance = currentUsdBalance.add(order.getTradableAmount().multiply(lastTrade.getPrice().getAmount()));
+                if (account.isEnoughBtc(order)) {
+                    account.sell(order.getTradableAmount(), lastTrade.getPrice());
                 }
             }
         }
-    }
-
-    /**
-     * @param order the order to be placed
-     * @param lastTrade the last trade data
-     * @return true if there is enough money to place the order, false otherwise
-     */
-    private boolean isEnoughUsd(Order order, Trade lastTrade) {
-        if (order.getType() == Order.OrderType.BID) {
-            return (order.getTradableAmount().multiply(lastTrade.getPrice().getAmount()).compareTo(currentUsdBalance) <= 0);
-        }
-        return true;
-    }
-
-    /**
-     * @param order the order to be placed
-     * @return true if there is enough bitcoins to place the order, false otherwise
-     */
-    private boolean isEnoughBtc(Order order) {
-        if (order.getType() == Order.OrderType.ASK) {
-            return (order.getTradableAmount().compareTo(currentBtcBalance) <= 0);
-        }
-        return true;
     }
 }

@@ -10,13 +10,13 @@ import eu.verdelhan.bitraac.data.Period;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 
-public class SimpleMovingAveragesAlgorithm extends TradingAlgorithm {
+public class ExponentialMovingAveragesAlgorithm extends TradingAlgorithm {
 
     private ArrayList<Period> tradesByPeriods = ExchangeMarket.getTradesByPeriod(60);
 
     @Override
     public boolean isEnoughTrades() {
-        return getPreviousTrades().size() > 10;
+        return getPreviousTrades().size() > 26;
     }
 
     @Override
@@ -39,9 +39,9 @@ public class SimpleMovingAveragesAlgorithm extends TradingAlgorithm {
     private double getTrendCoef() {
         double trendCoef = 1.0;
         if (isEnoughTrades()) {
-            double movingAvg25 = Overlays.getSimpleMovingAverage(tradesByPeriods, 25).doubleValue();
-            double movingAvg10 = Overlays.getSimpleMovingAverage(tradesByPeriods, 10).doubleValue();
-            trendCoef = movingAvg10 / movingAvg25;
+            double longTermAvg = Overlays.getSimpleMovingAverage(tradesByPeriods, 26).doubleValue();
+            double shortTermAvg = Overlays.getSimpleMovingAverage(tradesByPeriods, 12).doubleValue();
+            trendCoef = shortTermAvg / longTermAvg;
         }
         return trendCoef;
     }

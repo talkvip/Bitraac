@@ -40,8 +40,6 @@ public class DummyBinaryAlgorithm extends TradingAlgorithm {
             BigDecimal previousPrice = trades.get(trades.size() - 2).getPrice().getAmount();
             BigDecimal lastPrice = trades.get(trades.size() - 1).getPrice().getAmount();
             trendCoef = previousPrice.divide(lastPrice, 12, RoundingMode.HALF_UP).doubleValue();
-            // System.out.println("pp="+previousPrice+" lp="+lastPrice+
-            // " coef="+trendCoef);
         }
         return trendCoef;
     }

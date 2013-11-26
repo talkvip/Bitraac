@@ -10,7 +10,8 @@ public class Comparison {
         ac.compare(new NoAlgorithmAlgorithm(),
                 new DummyBinaryAlgorithm(),
                 new EnhancedBinaryAlgorithm(),
-                new SimpleMovingAveragesAlgorithm());
+                new SimpleMovingAveragesAlgorithm(),
+                new ExponentialMovingAveragesAlgorithm());
 
     }
 }

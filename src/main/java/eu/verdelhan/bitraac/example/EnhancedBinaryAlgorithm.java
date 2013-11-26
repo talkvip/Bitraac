@@ -1,15 +1,13 @@
 package eu.verdelhan.bitraac.example;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.ArrayList;
-
 import com.xeiam.xchange.currency.Currencies;
 import com.xeiam.xchange.dto.Order;
 import com.xeiam.xchange.dto.marketdata.Trade;
 import com.xeiam.xchange.dto.trade.MarketOrder;
-
 import eu.verdelhan.bitraac.algorithms.TradingAlgorithm;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
 
 public class EnhancedBinaryAlgorithm extends TradingAlgorithm {
 
@@ -48,8 +46,6 @@ public class EnhancedBinaryAlgorithm extends TradingAlgorithm {
             BigDecimal previousPrice = trades.get(trades.size() - 2).getPrice().getAmount();
             BigDecimal lastPrice = trades.get(trades.size() - 1).getPrice().getAmount();
             trendCoef = previousPrice.divide(lastPrice, 12, RoundingMode.HALF_UP).doubleValue();
-            // System.out.println("pp="+previousPrice+" lp="+lastPrice+
-            // " coef="+trendCoef);
         }
         return trendCoef;
     }
