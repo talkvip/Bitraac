@@ -137,7 +137,7 @@ public class Indicators {
 
         return shortTermEma.subtract(longTermEma);
     }
-    
+
     /**
      * @param periods the list of periods
      * @param lastPeriods the number of periods to use (i.e. the n last periods) (e.g. 20)
@@ -148,9 +148,34 @@ public class Indicators {
         if (lastPeriods > nbPeriods) {
             throw new IllegalArgumentException("Not enough periods");
         }
-        
+
         // TO DO
         return null;
+    }
+
+    /**
+     * @param periods the list of periods
+     * @param lastPeriods the number of periods to use (i.e. the n last periods) (e.g. 10)
+     * @return the standard deviation (volatility)
+     */
+    public static double getStandardDeviation(ArrayList<Period> periods, int lastPeriods) {
+        int nbPeriods = periods.size();
+        if (lastPeriods > nbPeriods) {
+            throw new IllegalArgumentException("Not enough periods");
+        }
+
+        // Getting the average close price
+        BigDecimal averageClosePrice = Overlays.getSimpleMovingAverage(periods, lastPeriods);
+
+        int firstPeriodIdx = (nbPeriods - lastPeriods) > 0 ? nbPeriods - lastPeriods : 0;
+        double sumOfSquaredDeviations = 0;
+        for (int i = firstPeriodIdx; i < nbPeriods; i++) {
+            Period period = periods.get(i);
+            BigDecimal closePrice = period.getLast().getPrice().getAmount();
+            sumOfSquaredDeviations += closePrice.subtract(averageClosePrice).pow(2).doubleValue();
+        }
+        
+        return Math.sqrt(sumOfSquaredDeviations / (nbPeriods - firstPeriodIdx));
     }
     
     /**

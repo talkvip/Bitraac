@@ -26,7 +26,7 @@ public class Overlays {
             throw new IllegalArgumentException("Not enough periods");
         }
 
-        BigDecimal average = new BigDecimal(0);
+        BigDecimal average = BigDecimal.ZERO;
         int firstPeriodIdx = (nbPeriods - lastPeriods) > 0 ? nbPeriods - lastPeriods : 0;
         for (int i = firstPeriodIdx; i < nbPeriods; i++) {
             Trade periodLastTrade = periods.get(i).getLast();
