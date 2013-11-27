@@ -102,7 +102,7 @@ public class ExchangeMarket {
     private static ArrayList<Trade> getLocalTrades() {
         ArrayList<Trade> trades = new ArrayList<Trade>();
         try {
-            BufferedReader fileReader = new BufferedReader(new InputStreamReader(AlgorithmComparator.class.getClassLoader().getResourceAsStream("bitstamp_usd.0.csv")));
+            BufferedReader fileReader = new BufferedReader(new InputStreamReader(AlgorithmComparator.class.getClassLoader().getResourceAsStream("bitstamp_usd.13.csv")));
             CSVReader csvReader = new CSVReader(fileReader, ',');
             String[] line;
             while ((line = csvReader.readNext()) != null) {

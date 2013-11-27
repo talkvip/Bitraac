@@ -68,25 +68,25 @@ public class Overlays {
 
     /**
      * @param period the period for which we want the trade volume
-     * @return the trade volume during the period
+     * @return the trade volume (always positive) during the period
      */
     public static BigDecimal getVolume(Period period) {
         BigDecimal volume = BigDecimal.ZERO;
         for (Trade trade : period.getTrades()) {
-            volume = volume.add(trade.getPrice().getAmount());
+            volume = volume.add(trade.getTradableAmount().multiply(trade.getPrice().getAmount()));
         }
         return volume;
     }
 
     /**
      * @param timestamp the date for which we want the trade volume
-     * @return the trade volume at timestamp
+     * @return the trade volume (always positive) at timestamp
      */
     public static BigDecimal getVolume(Date timestamp) {
         BigDecimal volume = BigDecimal.ZERO;
         for (Trade trade : ExchangeMarket.getAllTrades()) {
             if (timestamp.equals(trade.getTimestamp())) {
-                volume = volume.add(trade.getPrice().getAmount());
+                volume = volume.add(trade.getTradableAmount().multiply(trade.getPrice().getAmount()));
             }
         }
         return volume;

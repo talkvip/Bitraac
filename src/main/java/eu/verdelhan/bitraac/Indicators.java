@@ -20,9 +20,33 @@ public class Indicators {
      * @param lastPeriods the number of periods to use (i.e. the n last periods)
      * @return the ADL indicator
      */
-    public static double getAccumulationDistributionLine(ArrayList<Period> periods, int lastPeriods) {
-        // TO DO
-        return 0;
+    public static BigDecimal getAccumulationDistributionLine(ArrayList<Period> periods, int lastPeriods) {
+        int nbPeriods = periods.size();
+        if (lastPeriods > nbPeriods) {
+            throw new IllegalArgumentException("Not enough periods");
+        }
+
+        int firstPeriodIdx = (nbPeriods - lastPeriods) > 0 ? nbPeriods - lastPeriods : 0;
+        BigDecimal adl = BigDecimal.ZERO;
+        for (int i = firstPeriodIdx; i < nbPeriods; i++) {
+            Period period  = periods.get(i);
+
+            // Getting high, low and close prices
+            BigDecimal highPrice = period.getHigh().getPrice().getAmount();
+            BigDecimal lowPrice = period.getLow().getPrice().getAmount();
+            BigDecimal closePrice = period.getLast().getPrice().getAmount();
+
+            // Calculating the money flow multiplier
+            BigDecimal moneyFlowMultiplier = closePrice.subtract(lowPrice).subtract(highPrice.subtract(closePrice)).divide(highPrice.subtract(lowPrice), RoundingMode.HALF_UP);
+
+            // Calculating the money flow volume
+            BigDecimal moneyFlowVolume = moneyFlowMultiplier.multiply(Overlays.getVolume(period));
+
+            // Calculating the ADL
+            adl = adl.add(moneyFlowVolume);
+        }
+        
+        return adl;
     }
 
     /**
