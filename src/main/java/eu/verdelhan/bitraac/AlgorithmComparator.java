@@ -12,29 +12,23 @@ public class AlgorithmComparator {
 
     private BigDecimal initialUsdBalance;
     private BigDecimal initialBtcBalance;
-    private double transactionFee;
 
     private ExchangeAccount account;
 
     /**
      * @param initialUsdBalance the initial USD balance
-     * @param transactionFee the transaction (e.g. 0.5 for 0.5%)
      */
-    public AlgorithmComparator(double initialUsdBalance, double transactionFee)
-    {
-        this(initialUsdBalance, 0, transactionFee);
+    public AlgorithmComparator(double initialUsdBalance) {
+        this(initialUsdBalance, 0);
     }
 
     /**
      * @param initialUsdBalance the initial USD balance
      * @param initialBtcBalance the initial BTC balance
-     * @param transactionFee the transaction (e.g. 0.5 for 0.5%)
      */
-    public AlgorithmComparator(double initialUsdBalance, double initialBtcBalance, double transactionFee)
-    {
+    public AlgorithmComparator(double initialUsdBalance, double initialBtcBalance) {
         this.initialUsdBalance = new BigDecimal(initialUsdBalance);
         this.initialBtcBalance = new BigDecimal(initialBtcBalance);
-        this.transactionFee = transactionFee;
     }
 
     /**
@@ -49,7 +43,9 @@ public class AlgorithmComparator {
                 processMarketOrder((MarketOrder) algorithm.placeOrder(), trade);
                 btcUsd = trade.getPrice().getAmount();
             }
-            System.out.println("Assets ("+algorithm.getClass().getSimpleName()+"): $" + account.getOverallEarnings(btcUsd));
+            System.out.println("Results for " + algorithm.getClass().getSimpleName() + ":"
+                    + "\n\tOverall earnings: $" + account.getOverallEarnings(btcUsd)
+                    + "\n\tAccount infos: " + account);
         }
 //        ComparativeChart.addTradeSeries("trades", getLocalTrades());
 //        ComparativeChart.show();

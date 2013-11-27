@@ -3,6 +3,7 @@ package eu.verdelhan.bitraac.data;
 import com.xeiam.xchange.dto.Order;
 import com.xeiam.xchange.dto.marketdata.Trade;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import org.joda.money.BigMoney;
 
 /**
@@ -16,6 +17,14 @@ public class ExchangeAccount {
     private BigDecimal currentUsdBalance;
     private BigDecimal currentBtcBalance;
 
+    private BigDecimal feeBalance = BigDecimal.ZERO;
+
+    private int tradeCounter = 0;
+
+    /**
+     * @param initialUsdBalance the initial USD balance
+     * @param initialBtcBalance the initial BTC balance
+     */
     public ExchangeAccount(BigDecimal initialUsdBalance, BigDecimal initialBtcBalance) {
         this.initialUsdBalance = initialUsdBalance;
         this.initialBtcBalance = initialBtcBalance;
@@ -48,22 +57,32 @@ public class ExchangeAccount {
 
     /**
      * Buy an amount of BTC.
+     * (Deduct the exchange transaction fee so the real amount of buyed BTC will be lower)
      * @param amount the amount of BTC to buy
      * @param price the unit price
      */
     public void buy(BigDecimal amount, BigMoney price) {
-        currentUsdBalance = currentUsdBalance.subtract(amount.multiply(price.getAmount()));
-        currentBtcBalance = currentBtcBalance.add(amount);
+        // Deducting transaction fee
+        BigDecimal usdAmount = deductFee(amount.multiply(price.getAmount()));
+        currentUsdBalance = currentUsdBalance.subtract(usdAmount);
+        currentBtcBalance = currentBtcBalance.add(usdAmount.divide(price.getAmount(), RoundingMode.HALF_UP));
+        // Updating the trade counter
+        tradeCounter++;
     }
 
     /**
      * Sells an amount of BTC.
+     * (Deduct the exchange transaction fee)
      * @param amount the amount of BTC to sell
      * @param price the unit price
      */
     public void sell(BigDecimal amount, BigMoney price) {
         currentBtcBalance = currentBtcBalance.subtract(amount);
-        currentUsdBalance = currentUsdBalance.add(amount.multiply(price.getAmount()));
+        // Deducting transaction fee
+        BigDecimal usdAmount = deductFee(amount.multiply(price.getAmount()));
+        currentUsdBalance = currentUsdBalance.add(usdAmount);
+        // Updating the trade counter
+        tradeCounter++;
     }
 
     /**
@@ -74,5 +93,33 @@ public class ExchangeAccount {
         BigDecimal usdDifference = currentUsdBalance.subtract(initialUsdBalance);
         BigDecimal btcDifference = currentBtcBalance.subtract(initialBtcBalance);
         return usdDifference.add(btcDifference.multiply(currentBtcUsd)).doubleValue();
+    }
+
+    /**
+     * @return the overall deducted fees in USD
+     */
+    public double getOverallDeductedFees() {
+        return feeBalance.doubleValue();
+    }
+
+    @Override
+    public String toString() {
+        return "ExchangeAccount [initialUsdBalance=" + initialUsdBalance.doubleValue()
+                + ", initialBtcBalance=" + initialBtcBalance.doubleValue()
+                + ", currentUsdBalance=" + currentUsdBalance.doubleValue()
+                + ", currentBtcBalance=" + currentBtcBalance.doubleValue()
+                + ", feeBalance=" + feeBalance.doubleValue()
+                + ", tradeCounter=" + tradeCounter
+                + "]";
+    }
+
+    /**
+     * @param amount the USD amount before fee deduction
+     * @return the USD amount after fee deduction
+     */
+    private BigDecimal deductFee(BigDecimal amount) {
+        BigDecimal feeAmount = amount.multiply(new BigDecimal(ExchangeMarket.getTransactionFee())).setScale(2, BigDecimal.ROUND_UP);
+        feeBalance = feeBalance.add(feeAmount);
+        return amount.subtract(feeAmount);
     }
 }

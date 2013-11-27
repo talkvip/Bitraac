@@ -29,7 +29,16 @@ public class ExchangeMarket {
     private static final Exchange EXCHANGE = ExchangeFactory.INSTANCE.createExchange(BitstampExchange.class.getName());
     private static PollingMarketDataService marketDataService = EXCHANGE.getPollingMarketDataService();
 
+    private static final double TRANSACTION_FEE = 0.002;
+
     private static final ArrayList<Trade> TRADES = getLocalTrades();
+
+    /**
+     * @return the transaction fee ratio (e.g. 0.002 for 0.2%)
+     */
+    public static double getTransactionFee() {
+        return TRANSACTION_FEE;
+    }
 
     /**
      * @return the trades
@@ -93,7 +102,7 @@ public class ExchangeMarket {
     private static ArrayList<Trade> getLocalTrades() {
         ArrayList<Trade> trades = new ArrayList<Trade>();
         try {
-            BufferedReader fileReader = new BufferedReader(new InputStreamReader(AlgorithmComparator.class.getClassLoader().getResourceAsStream("bitstamp_usd.9.csv")));
+            BufferedReader fileReader = new BufferedReader(new InputStreamReader(AlgorithmComparator.class.getClassLoader().getResourceAsStream("bitstamp_usd.0.csv")));
             CSVReader csvReader = new CSVReader(fileReader, ',');
             String[] line;
             while ((line = csvReader.readNext()) != null) {
