@@ -11,7 +11,6 @@ See also:
 
 (or _ToDo List_ if you prefer)
 
-  * No transaction fees
   * No limit orders
   * Not enough overlays or indicators
   * No more than a few algorithms
