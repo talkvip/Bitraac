@@ -121,6 +121,36 @@ public class Indicators {
 
     /**
      * @param periods the list of periods
+     * @param lastPeriods the number of periods to use (i.e. the n last periods) (e.g. 14)
+     * @return the average true range
+     */
+    public static double getAverageTrueRange(ArrayList<Period> periods, int lastPeriods) {
+        int nbPeriods = periods.size();
+        if (lastPeriods > nbPeriods) {
+            throw new IllegalArgumentException("Not enough periods");
+        }
+
+        int firstPeriodIdx = (nbPeriods - lastPeriods) > 0 ? nbPeriods - lastPeriods : 0;
+        for (int i = firstPeriodIdx; i < nbPeriods; i++) {
+            Period period = periods.get(i);
+            double trueRange;
+            if (i == firstPeriodIdx) {
+                // First period
+                trueRange = getTrueRange(null, period);
+            } else {
+                // Subsequent periods
+                Period previousPeriod = periods.get(i - 1);
+                trueRange = getTrueRange(previousPeriod, period);
+                // TO DO
+            }
+        }
+
+
+        return 0;
+    }
+
+    /**
+     * @param periods the list of periods
      * @param shortTermEmaNbPeriods the number of periods to use (i.e. the n last periods) for short term EMA computation (e.g. 12)
      * @param longTermEmaNbPeriods the number of periods to use (i.e. the n last periods) for long term EMA computation (e.g. 26)
      * @return the MACD indicator
@@ -301,5 +331,34 @@ public class Indicators {
         // Relative strength index
         BigDecimal rsi = HUNDRED.subtract(HUNDRED.divide(relativeStrength.add(BigDecimal.ONE), RoundingMode.HALF_UP));
         return rsi;
+    }
+
+    /**
+     * @param previousPeriod the previous period
+     * @param currentPeriod the current period
+     * @return the true range for the current period
+     */
+    public static double getTrueRange(Period previousPeriod, Period currentPeriod) {
+        if (currentPeriod == null) {
+            throw new IllegalArgumentException("Current period should not be null");
+        }
+
+        //  Current extrema prices
+        BigDecimal currentHighPrice = currentPeriod.getHigh().getPrice().getAmount();
+        BigDecimal currentLowPrice = currentPeriod.getLow().getPrice().getAmount();
+
+        double trueRange;
+        if (previousPeriod == null) {
+            // No previous period
+            trueRange = currentHighPrice.subtract(currentLowPrice).doubleValue();
+        } else {
+            // Using the previous close price
+            BigDecimal previousClosePrice = previousPeriod.getLast().getPrice().getAmount();
+            BigDecimal trueRangeMethod1 = currentHighPrice.subtract(currentLowPrice);
+            BigDecimal trueRangeMethod2 = currentHighPrice.subtract(previousClosePrice).abs();
+            BigDecimal trueRangeMethod3 = currentLowPrice.subtract(previousClosePrice).abs();
+            trueRange = trueRangeMethod1.max(trueRangeMethod2).max(trueRangeMethod3).doubleValue();
+        }
+        return trueRange;
     }
 }
