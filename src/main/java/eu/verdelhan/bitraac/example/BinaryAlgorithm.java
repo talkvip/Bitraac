@@ -5,16 +5,12 @@ import com.xeiam.xchange.dto.Order;
 import com.xeiam.xchange.dto.marketdata.Trade;
 import com.xeiam.xchange.dto.trade.MarketOrder;
 import eu.verdelhan.bitraac.algorithms.TradingAlgorithm;
+import eu.verdelhan.bitraac.data.ExchangeMarket;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 
 public class BinaryAlgorithm extends TradingAlgorithm {
-
-    @Override
-    public boolean isEnoughTrades() {
-        return getPreviousTrades().size() > 2;
-    }
 
     @Override
     public Order placeOrder() {
@@ -41,8 +37,8 @@ public class BinaryAlgorithm extends TradingAlgorithm {
 
     private double getTrendCoef() {
         double trendCoef = 1.0;
-        if (isEnoughTrades()) {
-            ArrayList<Trade> trades = getPreviousTrades();
+        if (ExchangeMarket.isEnoughTrades(2)) {
+            ArrayList<Trade> trades = ExchangeMarket.getPreviousTrades();
             BigDecimal previousPrice = trades.get(trades.size() - 2).getPrice().getAmount();
             BigDecimal lastPrice = trades.get(trades.size() - 1).getPrice().getAmount();
             trendCoef = previousPrice.divide(lastPrice, 12, RoundingMode.HALF_UP).doubleValue();

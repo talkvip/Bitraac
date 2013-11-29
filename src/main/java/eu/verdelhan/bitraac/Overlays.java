@@ -60,8 +60,11 @@ public class Overlays {
         // so a simple moving average is used as the previous period's EMA in the first calculation.
         BigDecimal ema = getSimpleMovingAverage(periods, lastPeriods);
         for (int i = firstPeriodIdx + 1; i < lastPeriods; i++) {
-            BigDecimal closePrice = periods.get(i).getLast().getPrice().getAmount();
-            ema = closePrice.subtract(ema).multiply(multiplier).add(ema);
+            Trade periodLastTrade = periods.get(i).getLast();
+            if (periodLastTrade != null) {
+                BigDecimal closePrice = periodLastTrade.getPrice().getAmount();
+                ema = closePrice.subtract(ema).multiply(multiplier).add(ema);
+            }
         }
         return ema;
     }

@@ -4,6 +4,7 @@ import com.xeiam.xchange.dto.marketdata.Trade;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 import org.joda.money.BigMoney;
 
 /**
@@ -11,10 +12,29 @@ import org.joda.money.BigMoney;
  */
 public class Period {
 
+    /** The duration of a period (in seconds) */
+    public static final int DURATION = 60;
+
     private Date startTimestamp;
     private Date endTimestamp;
 
     private ArrayList<Trade> trades = new ArrayList<Trade>();
+
+    /**
+     * @param trade the first trade of the period
+     */
+    public Period(Trade trade) {
+        this(trade.getTimestamp());
+        trades.add(trade);
+    }
+
+    /**
+     * @param startTimestamp the start date of the periode
+     */
+    public Period(Date startTimestamp) {
+        this(startTimestamp,
+             new Date(startTimestamp.getTime() + TimeUnit.SECONDS.toMillis(DURATION)));
+    }
 
     /**
      * @param startTimestamp the start date of the periode
@@ -31,6 +51,13 @@ public class Period {
      */
     public boolean inPeriod(Date date) {
         return date == null ? false : (!date.before(startTimestamp) && date.before(endTimestamp));
+    }
+
+    /**
+     * @return the end date of the period
+     */
+    public Date getEndTimestamp() {
+        return endTimestamp;
     }
 
     /**
@@ -95,5 +122,10 @@ public class Period {
         BigMoney low = getLow().getPrice();
         BigMoney close = getLast().getPrice();
         return high.plus(low).plus(close).dividedBy(3, RoundingMode.HALF_UP);
+    }
+
+    @Override
+    public String toString() {
+        return "Period [" + "startTimestamp=" + startTimestamp + ", endTimestamp=" + endTimestamp + ", trades=" + trades.size() + ']';
     }
 }

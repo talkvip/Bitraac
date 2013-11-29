@@ -29,9 +29,14 @@ public class ExchangeMarket {
     private static final Exchange EXCHANGE = ExchangeFactory.INSTANCE.createExchange(BitstampExchange.class.getName());
     private static PollingMarketDataService marketDataService = EXCHANGE.getPollingMarketDataService();
 
+    /** The transaction fee ratio (e.g. 0.002 for 0.2%) */
     private static final double TRANSACTION_FEE = 0.002;
 
+    /** The list of all trades */
     private static final ArrayList<Trade> TRADES = getLocalTrades();
+
+    /** The list of past periods */
+    private static final ArrayList<Period> PREVIOUS_PERIODS = new ArrayList<Period>(100);
 
     /**
      * @return the transaction fee ratio (e.g. 0.002 for 0.2%)
@@ -48,34 +53,51 @@ public class ExchangeMarket {
     }
 
     /**
-     * @param duration the duration (in seconds) of each periods
-     * @return the periods with their trades
+     * @param trade the trade to be added
      */
-    public static ArrayList<Period> getTradesByPeriod(int duration) {
-        ArrayList<Period> periods = new ArrayList<Period>(1000);
-
-        // Building the list of periods
-        Date firstTradeDate = TRADES.get(0).getTimestamp();
-        Date lastTradeDate = TRADES.get(TRADES.size()-1).getTimestamp();
-        Date periodStartDate = firstTradeDate;
-        while (!periodStartDate.after(lastTradeDate)) {
-            Date periodEndDate = new Date(periodStartDate.getTime() + TimeUnit.SECONDS.toMillis(duration));
-            periods.add(new Period(periodStartDate, periodEndDate));
-            periodStartDate = periodEndDate;
-        }
-
-        // Adding trades for each period
-        for (Trade trade : TRADES) {
-            Date tradeDate = trade.getTimestamp();
-            for (Period period : periods) {
-                if (period.inPeriod(tradeDate)) {
-                    period.addTrade(trade);
-                    break;
-                }
+    public static void addTrade(Trade trade) {
+        if (PREVIOUS_PERIODS.isEmpty()) {
+            // First trade
+            PREVIOUS_PERIODS.add(new Period(trade));
+        } else {
+            // Subsequent trades
+            Period lastPeriod = PREVIOUS_PERIODS.get(PREVIOUS_PERIODS.size() - 1);
+            while (!lastPeriod.inPeriod(trade.getTimestamp())) {
+                PREVIOUS_PERIODS.add(new Period(lastPeriod.getEndTimestamp()));
+                lastPeriod = PREVIOUS_PERIODS.get(PREVIOUS_PERIODS.size() - 1);
             }
+            lastPeriod.addTrade(trade);
         }
+    }
+    
+    /**
+     * @param nbPeriods the number of periods
+     * @return true if there is at least nbPeriods periods, false otherwise
+     */
+    public static boolean isEnoughPeriods(int nbPeriods) {
+        return (PREVIOUS_PERIODS.size() >= nbPeriods);
+    }
 
-        return periods;
+    /**
+     * @param nbTrades the number of trades
+     * @return true if the current period contains at least nbTrades trades, false otherwise
+     */
+    public static boolean isEnoughTrades(int nbTrades) {
+        return !PREVIOUS_PERIODS.isEmpty() && (PREVIOUS_PERIODS.get(PREVIOUS_PERIODS.size() - 1).getTrades().size() >= nbTrades);
+    }
+
+    /**
+     * @return the list of past periods
+     */
+    public static ArrayList<Period> getPreviousPeriods() {
+        return PREVIOUS_PERIODS;
+    }
+
+    /**
+     * @return the past trades for the current period
+     */
+    public static ArrayList<Trade> getPreviousTrades() {
+        return PREVIOUS_PERIODS.get(PREVIOUS_PERIODS.size() - 1).getTrades();
     }
 
     /**
