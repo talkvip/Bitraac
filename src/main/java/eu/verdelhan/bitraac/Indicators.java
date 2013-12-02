@@ -1,5 +1,6 @@
 package eu.verdelhan.bitraac;
 
+import com.xeiam.xchange.dto.marketdata.Trade;
 import eu.verdelhan.bitraac.data.Period;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -40,7 +41,7 @@ public class Indicators {
             BigDecimal moneyFlowMultiplier = closePrice.subtract(lowPrice).subtract(highPrice.subtract(closePrice)).divide(highPrice.subtract(lowPrice), RoundingMode.HALF_UP);
 
             // Calculating the money flow volume
-            BigDecimal moneyFlowVolume = moneyFlowMultiplier.multiply(Overlays.getVolume(period));
+            BigDecimal moneyFlowVolume = moneyFlowMultiplier.multiply(getVolume(period));
 
             // Calculating the ADL
             adl = adl.add(moneyFlowVolume);
@@ -142,11 +143,41 @@ public class Indicators {
                 Period previousPeriod = periods.get(i - 1);
                 trueRange = getTrueRange(previousPeriod, period);
                 // TO DO
+                throw new UnsupportedOperationException("Not yet implemented");
             }
         }
 
 
         return 0;
+    }
+
+    /**
+     * @param periods the list of periods
+     * @param lastPeriods the number of periods to use (i.e. the n last periods)
+     * @return the exponential moving average price of trades
+     */
+    public static BigDecimal getExponentialMovingAverage(ArrayList<Period> periods, int lastPeriods) {
+        int nbPeriods = periods.size();
+        if (lastPeriods > nbPeriods) {
+            throw new IllegalArgumentException("Not enough periods");
+        }
+        lastPeriods = (nbPeriods - lastPeriods) > 0 ? lastPeriods : nbPeriods;
+
+        BigDecimal multiplier = new BigDecimal((double) (2 / ((double) lastPeriods + 1))); // Weighting multiplier
+
+        // Computing EMAs
+        int firstPeriodIdx = nbPeriods - lastPeriods;
+        // An exponential moving average (EMA) has to start somewhere
+        // so a simple moving average is used as the previous period's EMA in the first calculation.
+        BigDecimal ema = getSimpleMovingAverage(periods, lastPeriods);
+        for (int i = firstPeriodIdx + 1; i < lastPeriods; i++) {
+            Trade periodLastTrade = periods.get(i).getLast();
+            if (periodLastTrade != null) {
+                BigDecimal closePrice = periodLastTrade.getPrice().getAmount();
+                ema = closePrice.subtract(ema).multiply(multiplier).add(ema);
+            }
+        }
+        return ema;
     }
 
     /**
@@ -162,8 +193,8 @@ public class Indicators {
         }
 
         // Computing exponential moving averages
-        BigDecimal shortTermEma = Overlays.getExponentialMovingAverage(periods, shortTermEmaNbPeriods);
-        BigDecimal longTermEma = Overlays.getExponentialMovingAverage(periods, longTermEmaNbPeriods);
+        BigDecimal shortTermEma = getExponentialMovingAverage(periods, shortTermEmaNbPeriods);
+        BigDecimal longTermEma = getExponentialMovingAverage(periods, longTermEmaNbPeriods);
 
         return shortTermEma.subtract(longTermEma);
     }
@@ -180,32 +211,7 @@ public class Indicators {
         }
 
         // TO DO
-        return null;
-    }
-
-    /**
-     * @param periods the list of periods
-     * @param lastPeriods the number of periods to use (i.e. the n last periods) (e.g. 10)
-     * @return the standard deviation (volatility)
-     */
-    public static double getStandardDeviation(ArrayList<Period> periods, int lastPeriods) {
-        int nbPeriods = periods.size();
-        if (lastPeriods > nbPeriods) {
-            throw new IllegalArgumentException("Not enough periods");
-        }
-
-        // Getting the average close price
-        BigDecimal averageClosePrice = Overlays.getSimpleMovingAverage(periods, lastPeriods);
-
-        int firstPeriodIdx = (nbPeriods - lastPeriods) > 0 ? nbPeriods - lastPeriods : 0;
-        double sumOfSquaredDeviations = 0;
-        for (int i = firstPeriodIdx; i < nbPeriods; i++) {
-            Period period = periods.get(i);
-            BigDecimal closePrice = period.getLast().getPrice().getAmount();
-            sumOfSquaredDeviations += closePrice.subtract(averageClosePrice).pow(2).doubleValue();
-        }
-        
-        return Math.sqrt(sumOfSquaredDeviations / (nbPeriods - firstPeriodIdx));
+        throw new UnsupportedOperationException("Not yet implemented");
     }
     
     /**
@@ -220,7 +226,7 @@ public class Indicators {
         }
         
         // TO DO
-        return null;
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     /**
@@ -236,8 +242,8 @@ public class Indicators {
         }
 
         // Computing exponential moving averages
-        BigDecimal shortTermEma = Overlays.getExponentialMovingAverage(periods, shortTermEmaNbPeriods);
-        BigDecimal longTermEma = Overlays.getExponentialMovingAverage(periods, longTermEmaNbPeriods);
+        BigDecimal shortTermEma = getExponentialMovingAverage(periods, shortTermEmaNbPeriods);
+        BigDecimal longTermEma = getExponentialMovingAverage(periods, longTermEmaNbPeriods);
 
         return shortTermEma.subtract(longTermEma).divide(longTermEma, RoundingMode.HALF_UP).multiply(HUNDRED);
     }
@@ -249,7 +255,7 @@ public class Indicators {
      * @param n the current price will be compared with the price "n" (e.g. 12) periods ago
      * @return the rate of change (ROC)
      */
-    public static BigDecimal getRateOfChange(ArrayList<Period> periods, int n) {
+    public static double getRateOfChange(ArrayList<Period> periods, int n) {
         int nbPeriods = periods.size();
         if (n > nbPeriods) {
             throw new IllegalArgumentException("Not enough periods");
@@ -258,7 +264,7 @@ public class Indicators {
         BigDecimal nPeriodsAgoClosePrice = periods.get(nbPeriods - 1 - n).getLast().getPrice().getAmount();
         BigDecimal currentClosePrice = periods.get(nbPeriods - 1).getLast().getPrice().getAmount();
 
-        return currentClosePrice.subtract(nPeriodsAgoClosePrice).divide(nPeriodsAgoClosePrice, RoundingMode.HALF_UP).multiply(HUNDRED);
+        return currentClosePrice.subtract(nPeriodsAgoClosePrice).divide(nPeriodsAgoClosePrice, RoundingMode.HALF_UP).multiply(HUNDRED).doubleValue();
     }
 
     /**
@@ -334,6 +340,56 @@ public class Indicators {
     }
 
     /**
+     * @param periods the list of periods
+     * @param lastPeriods the number of periods to use (i.e. the n last periods)
+     * @return the simple moving average price of trades
+     */
+    public static BigDecimal getSimpleMovingAverage(ArrayList<Period> periods, int lastPeriods) {
+        int nbPeriods = periods.size();
+        if (lastPeriods > nbPeriods) {
+            throw new IllegalArgumentException("Not enough periods");
+        }
+
+        BigDecimal average = BigDecimal.ZERO;
+        int firstPeriodIdx = (nbPeriods - lastPeriods) > 0 ? nbPeriods - lastPeriods : 0;
+        for (int i = firstPeriodIdx; i < nbPeriods; i++) {
+            Trade periodLastTrade = periods.get(i).getLast();
+            if (periodLastTrade == null) {
+                // No trade in the period
+                lastPeriods--;
+            } else {
+                average = average.add(periodLastTrade.getPrice().getAmount());
+            }
+        }
+        return average.divide(new BigDecimal(lastPeriods), RoundingMode.HALF_UP);
+    }
+
+    /**
+     * @param periods the list of periods
+     * @param lastPeriods the number of periods to use (i.e. the n last periods) (e.g. 10)
+     * @return the standard deviation (volatility)
+     */
+    public static double getStandardDeviation(ArrayList<Period> periods, int lastPeriods) {
+        int nbPeriods = periods.size();
+        if (lastPeriods > nbPeriods) {
+            throw new IllegalArgumentException("Not enough periods");
+        }
+
+        // Getting the average close price
+        BigDecimal averageClosePrice = getSimpleMovingAverage(periods, lastPeriods);
+
+        int firstPeriodIdx = (nbPeriods - lastPeriods) > 0 ? nbPeriods - lastPeriods : 0;
+        double sumOfSquaredDeviations = 0;
+        for (int i = firstPeriodIdx; i < nbPeriods; i++) {
+            Period period = periods.get(i);
+            BigDecimal closePrice = period.getLast().getPrice().getAmount();
+            sumOfSquaredDeviations += closePrice.subtract(averageClosePrice).pow(2).doubleValue();
+        }
+
+        return Math.sqrt(sumOfSquaredDeviations / (nbPeriods - firstPeriodIdx));
+    }
+
+    /**
      * @param previousPeriod the previous period
      * @param currentPeriod the current period
      * @return the true range for the current period
@@ -360,5 +416,17 @@ public class Indicators {
             trueRange = trueRangeMethod1.max(trueRangeMethod2).max(trueRangeMethod3).doubleValue();
         }
         return trueRange;
+    }
+
+    /**
+     * @param period the period for which we want the trade volume
+     * @return the trade volume (always positive) during the period
+     */
+    public static BigDecimal getVolume(Period period) {
+        BigDecimal volume = BigDecimal.ZERO;
+        for (Trade trade : period.getTrades()) {
+            volume = volume.add(trade.getTradableAmount().multiply(trade.getPrice().getAmount()));
+        }
+        return volume;
     }
 }

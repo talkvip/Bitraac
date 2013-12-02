@@ -13,7 +13,7 @@ import org.joda.money.BigMoney;
 public class Period {
 
     /** The duration of a period (in seconds) */
-    public static final int DURATION = 60;
+    public static final int DURATION = 300;
 
     private Date startTimestamp;
     private Date endTimestamp;

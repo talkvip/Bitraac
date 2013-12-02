@@ -3,7 +3,7 @@ package eu.verdelhan.bitraac.example;
 import com.xeiam.xchange.currency.Currencies;
 import com.xeiam.xchange.dto.Order;
 import com.xeiam.xchange.dto.trade.MarketOrder;
-import eu.verdelhan.bitraac.Overlays;
+import eu.verdelhan.bitraac.Indicators;
 import eu.verdelhan.bitraac.algorithms.TradingAlgorithm;
 import eu.verdelhan.bitraac.data.ExchangeMarket;
 import java.math.BigDecimal;
@@ -30,8 +30,8 @@ public class SimpleMovingAveragesAlgorithm extends TradingAlgorithm {
     private double getTrendCoef() {
         double trendCoef = 1.0;
         if (ExchangeMarket.isEnoughPeriods(25)) {
-            double movingAvg25 = Overlays.getSimpleMovingAverage(ExchangeMarket.getPreviousPeriods(), 25).doubleValue();
-            double movingAvg10 = Overlays.getSimpleMovingAverage(ExchangeMarket.getPreviousPeriods(), 10).doubleValue();
+            double movingAvg25 = Indicators.getSimpleMovingAverage(ExchangeMarket.getPreviousPeriods(), 25).doubleValue();
+            double movingAvg10 = Indicators.getSimpleMovingAverage(ExchangeMarket.getPreviousPeriods(), 10).doubleValue();
             trendCoef = movingAvg10 / movingAvg25;
         }
         return trendCoef;
