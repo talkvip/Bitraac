@@ -10,6 +10,10 @@ import java.math.BigDecimal;
 
 public class PPOAlgorithm extends TradingAlgorithm {
 
+    public PPOAlgorithm(double initialUsdBalance, double initialBtcBalance) {
+        super(initialUsdBalance, initialBtcBalance);
+    }
+
     @Override
     public Order placeOrder() {
         Order order;

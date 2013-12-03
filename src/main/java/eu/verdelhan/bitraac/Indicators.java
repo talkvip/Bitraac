@@ -67,16 +67,18 @@ public class Indicators {
         int firstPeriodIdx = (nbPeriods - lastPeriods) > 0 ? nbPeriods - lastPeriods : 0;
         for (int i = firstPeriodIdx; i < nbPeriods; i++) {
             Period period  = periods.get(i);
-            if (highPeriod == null) {
-                highPeriod = period;
-            } else {
-                BigMoney highPrice = highPeriod.getHigh().getPrice();
-                BigMoney currentPrice = period.getHigh().getPrice();
-                if (currentPrice.isGreaterThan(highPrice)
-                        || currentPrice.isEqual(highPrice)) {
-                    // New high price
+            Trade currentHighTrade = period.getHigh();
+            if (currentHighTrade != null) {
+                if (highPeriod == null) {
                     highPeriod = period;
-                    nbPeriodsSinceHigh = 0;
+                } else {
+                    BigMoney highPrice = highPeriod.getHigh().getPrice();
+                    if (currentHighTrade.getPrice().isGreaterThan(highPrice)
+                            || currentHighTrade.getPrice().isEqual(highPrice)) {
+                        // New high price
+                        highPeriod = period;
+                        nbPeriodsSinceHigh = 0;
+                    }
                 }
             }
             nbPeriodsSinceHigh++;
@@ -102,16 +104,18 @@ public class Indicators {
         int firstPeriodIdx = (nbPeriods - lastPeriods) > 0 ? nbPeriods - lastPeriods : 0;
         for (int i = firstPeriodIdx; i < nbPeriods; i++) {
             Period period  = periods.get(i);
-            if (lowPeriod == null) {
-                lowPeriod = period;
-            } else {
-                BigMoney lowPrice = lowPeriod.getLow().getPrice();
-                BigMoney currentPrice = period.getLow().getPrice();
-                if (currentPrice.isLessThan(lowPrice)
-                        || currentPrice.isEqual(lowPrice)) {
-                    // New low price
+            Trade currentLowTrade = period.getLow();
+            if (currentLowTrade != null) {
+                if (lowPeriod == null) {
                     lowPeriod = period;
-                    nbPeriodsSinceLow = 0;
+                } else {
+                    BigMoney lowPrice = lowPeriod.getLow().getPrice();
+                    if (currentLowTrade.getPrice().isLessThan(lowPrice)
+                            || currentLowTrade.getPrice().isEqual(lowPrice)) {
+                        // New low price
+                        lowPeriod = period;
+                        nbPeriodsSinceLow = 0;
+                    }
                 }
             }
             nbPeriodsSinceLow++;
@@ -261,10 +265,14 @@ public class Indicators {
             throw new IllegalArgumentException("Not enough periods");
         }
 
-        BigDecimal nPeriodsAgoClosePrice = periods.get(nbPeriods - 1 - n).getLast().getPrice().getAmount();
-        BigDecimal currentClosePrice = periods.get(nbPeriods - 1).getLast().getPrice().getAmount();
+        try {
+            BigDecimal nPeriodsAgoClosePrice = periods.get(nbPeriods - n).getLast().getPrice().getAmount();
+            BigDecimal currentClosePrice = periods.get(nbPeriods - 1).getLast().getPrice().getAmount();
 
-        return currentClosePrice.subtract(nPeriodsAgoClosePrice).divide(nPeriodsAgoClosePrice, RoundingMode.HALF_UP).multiply(HUNDRED).doubleValue();
+            return currentClosePrice.subtract(nPeriodsAgoClosePrice).divide(nPeriodsAgoClosePrice, RoundingMode.HALF_UP).multiply(HUNDRED).doubleValue();
+        } catch (RuntimeException re) {
+            return Double.NaN;
+        }
     }
 
     /**

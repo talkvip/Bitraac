@@ -25,11 +25,33 @@ public class ExchangeAccount {
      * @param initialUsdBalance the initial USD balance
      * @param initialBtcBalance the initial BTC balance
      */
+    public ExchangeAccount(double initialUsdBalance, double initialBtcBalance) {
+        this(new BigDecimal(initialUsdBalance), new BigDecimal(initialBtcBalance));
+    }
+
+    /**
+     * @param initialUsdBalance the initial USD balance
+     * @param initialBtcBalance the initial BTC balance
+     */
     public ExchangeAccount(BigDecimal initialUsdBalance, BigDecimal initialBtcBalance) {
         this.initialUsdBalance = initialUsdBalance;
         this.initialBtcBalance = initialBtcBalance;
         this.currentUsdBalance = initialUsdBalance;
         this.currentBtcBalance = initialBtcBalance;
+    }
+
+    /**
+     * @return the current USD balance
+     */
+    public BigDecimal getCurrentUsdBalance() {
+        return currentUsdBalance;
+    }
+
+    /**
+     * @return the current BTC balance
+     */
+    public BigDecimal getCurrentBtcBalance() {
+        return currentBtcBalance;
     }
 
     /**

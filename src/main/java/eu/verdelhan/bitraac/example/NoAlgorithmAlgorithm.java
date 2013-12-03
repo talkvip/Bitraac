@@ -11,6 +11,10 @@ import java.util.ArrayList;
 
 public class NoAlgorithmAlgorithm extends TradingAlgorithm {
 
+    public NoAlgorithmAlgorithm(double initialUsdBalance, double initialBtcBalance) {
+        super(initialUsdBalance, initialBtcBalance);
+    }
+
     @Override
     public Order placeOrder() {
         Order order = null;

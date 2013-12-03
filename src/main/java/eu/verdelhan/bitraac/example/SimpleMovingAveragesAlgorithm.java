@@ -10,6 +10,10 @@ import java.math.BigDecimal;
 
 public class SimpleMovingAveragesAlgorithm extends TradingAlgorithm {
 
+    public SimpleMovingAveragesAlgorithm(double initialUsdBalance, double initialBtcBalance) {
+        super(initialUsdBalance, initialBtcBalance);
+    }
+
     @Override
     public Order placeOrder() {
         Order order;

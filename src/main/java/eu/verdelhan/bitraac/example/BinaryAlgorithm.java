@@ -12,6 +12,10 @@ import java.util.ArrayList;
 
 public class BinaryAlgorithm extends TradingAlgorithm {
 
+    public BinaryAlgorithm(double initialUsdBalance, double initialBtcBalance) {
+        super(initialUsdBalance, initialBtcBalance);
+    }
+
     @Override
     public Order placeOrder() {
         Order order;

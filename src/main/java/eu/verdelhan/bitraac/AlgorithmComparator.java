@@ -6,44 +6,13 @@ import eu.verdelhan.bitraac.algorithms.TradingAlgorithm;
 import eu.verdelhan.bitraac.data.ExchangeAccount;
 import eu.verdelhan.bitraac.data.ExchangeMarket;
 import java.math.BigDecimal;
-import java.util.HashMap;
 
 public class AlgorithmComparator {
-
-    /** The initial USD balance */
-    private BigDecimal initialUsdBalance;
-
-    /** The initial BTC balance */
-    private BigDecimal initialBtcBalance;
-
-    /** One account for each trading algorithm */
-    private HashMap<TradingAlgorithm, ExchangeAccount> accounts = new HashMap<TradingAlgorithm, ExchangeAccount>();
-
-    /**
-     * @param initialUsdBalance the initial USD balance
-     */
-    public AlgorithmComparator(double initialUsdBalance) {
-        this(initialUsdBalance, 0);
-    }
-
-    /**
-     * @param initialUsdBalance the initial USD balance
-     * @param initialBtcBalance the initial BTC balance
-     */
-    public AlgorithmComparator(double initialUsdBalance, double initialBtcBalance) {
-        this.initialUsdBalance = new BigDecimal(initialUsdBalance);
-        this.initialBtcBalance = new BigDecimal(initialBtcBalance);
-    }
 
     /**
      * @param algorithms the algorithms to be compared
      */
     public void compare(TradingAlgorithm... algorithms) {
-        // Initialization
-        for (TradingAlgorithm algorithm : algorithms) {
-            accounts.put(algorithm, new ExchangeAccount(initialUsdBalance, initialBtcBalance));
-        }
-
         // Processing orders
         BigDecimal btcUsd = null;
         for (Trade trade : ExchangeMarket.getAllTrades()) {
@@ -56,7 +25,7 @@ public class AlgorithmComparator {
 
         // Results
         for (TradingAlgorithm algorithm : algorithms) {
-            ExchangeAccount account = accounts.get(algorithm);
+            ExchangeAccount account = algorithm.getExchangeAccount();
             System.out.println("Results for " + algorithm.getClass().getSimpleName() + ":"
                 + "\n\tOverall earnings: $" + account.getOverallEarnings(btcUsd)
                 + "\n\tAccount infos: " + account);
@@ -72,7 +41,7 @@ public class AlgorithmComparator {
         if (algorithm != null) {
             Order order = algorithm.placeOrder();
             if (order != null) {
-                ExchangeAccount account = accounts.get(algorithm);
+                ExchangeAccount account = algorithm.getExchangeAccount();
                 if (order.getType() == Order.OrderType.BID) {
                     // Buy
                     if (account.isEnoughUsd(order, lastTrade)) {
