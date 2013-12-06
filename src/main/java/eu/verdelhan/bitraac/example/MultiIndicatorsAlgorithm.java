@@ -3,9 +3,12 @@ package eu.verdelhan.bitraac.example;
 import com.xeiam.xchange.currency.Currencies;
 import com.xeiam.xchange.dto.Order;
 import com.xeiam.xchange.dto.trade.MarketOrder;
-import eu.verdelhan.bitraac.Indicators;
 import eu.verdelhan.bitraac.algorithms.TradingAlgorithm;
 import eu.verdelhan.bitraac.data.ExchangeMarket;
+import eu.verdelhan.bitraac.indicators.AroonDown;
+import eu.verdelhan.bitraac.indicators.AroonUp;
+import eu.verdelhan.bitraac.indicators.PPO;
+import eu.verdelhan.bitraac.indicators.ROC;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
@@ -68,22 +71,22 @@ public class MultiIndicatorsAlgorithm extends TradingAlgorithm {
     private double getTrendStrength() {
         double ppo = 0;
         if (ExchangeMarket.isEnoughPeriods(LONG_TERM_EMA_NB_PERIODS)) {
-            ppo = Indicators.getPercentagePriceOscillator(ExchangeMarket.getPreviousPeriods(), SHORT_TERM_EMA_NB_PERIODS, LONG_TERM_EMA_NB_PERIODS).doubleValue();
+            ppo = new PPO(ExchangeMarket.getPreviousPeriods(), SHORT_TERM_EMA_NB_PERIODS, LONG_TERM_EMA_NB_PERIODS).execute().doubleValue();
         }
         return ppo;
     }
 
     private boolean isConsolidation() {
-        double aroonUp = Indicators.getAroonUp(ExchangeMarket.getPreviousPeriods(), AROON_NB_PERIODS);
-        double aroonDown = Indicators.getAroonUp(ExchangeMarket.getPreviousPeriods(), AROON_NB_PERIODS);
+        double aroonUp = new AroonUp(ExchangeMarket.getPreviousPeriods(), AROON_NB_PERIODS).execute();
+        double aroonDown = new AroonDown(ExchangeMarket.getPreviousPeriods(), AROON_NB_PERIODS).execute();
         return (aroonUp < 50 && aroonDown < 50);
     }
 
     private boolean isOverbought() {
-        return Indicators.getRateOfChange(ExchangeMarket.getPreviousPeriods(), ROC_NB_PERIODS) >= ROC_HIGH_THRESHOLD;
+        return new ROC(ExchangeMarket.getPreviousPeriods(), ROC_NB_PERIODS).execute() >= ROC_HIGH_THRESHOLD;
     }
 
     private boolean isOversold() {
-        return Indicators.getRateOfChange(ExchangeMarket.getPreviousPeriods(), ROC_NB_PERIODS) <= (ROC_HIGH_THRESHOLD * -1.0);
+        return new ROC(ExchangeMarket.getPreviousPeriods(), ROC_NB_PERIODS).execute() <= (ROC_HIGH_THRESHOLD * -1.0);
     }
 }

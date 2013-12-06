@@ -3,9 +3,9 @@ package eu.verdelhan.bitraac.example;
 import com.xeiam.xchange.currency.Currencies;
 import com.xeiam.xchange.dto.Order;
 import com.xeiam.xchange.dto.trade.MarketOrder;
-import eu.verdelhan.bitraac.Indicators;
 import eu.verdelhan.bitraac.algorithms.TradingAlgorithm;
 import eu.verdelhan.bitraac.data.ExchangeMarket;
+import eu.verdelhan.bitraac.indicators.PPO;
 import java.math.BigDecimal;
 
 public class PPOAlgorithm extends TradingAlgorithm {
@@ -33,7 +33,7 @@ public class PPOAlgorithm extends TradingAlgorithm {
     private double getPPO() {
         double ppo = 0;
         if (ExchangeMarket.isEnoughPeriods(26)) {
-            ppo = Indicators.getPercentagePriceOscillator(ExchangeMarket.getPreviousPeriods(), 12, 26).doubleValue();
+            ppo = new PPO(ExchangeMarket.getPreviousPeriods(), 12, 26).execute().doubleValue();
             //System.out.println("ppo: " + ppo);
         }
         return ppo;

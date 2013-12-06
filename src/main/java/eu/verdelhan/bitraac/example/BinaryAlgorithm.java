@@ -8,7 +8,7 @@ import eu.verdelhan.bitraac.algorithms.TradingAlgorithm;
 import eu.verdelhan.bitraac.data.ExchangeMarket;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
+import java.util.List;
 
 public class BinaryAlgorithm extends TradingAlgorithm {
 
@@ -42,7 +42,7 @@ public class BinaryAlgorithm extends TradingAlgorithm {
     private double getTrendCoef() {
         double trendCoef = 1.0;
         if (ExchangeMarket.isEnoughTrades(2)) {
-            ArrayList<Trade> trades = ExchangeMarket.getPreviousTrades();
+            List<Trade> trades = ExchangeMarket.getPreviousTrades();
             BigDecimal previousPrice = trades.get(trades.size() - 2).getPrice().getAmount();
             BigDecimal lastPrice = trades.get(trades.size() - 1).getPrice().getAmount();
             trendCoef = previousPrice.divide(lastPrice, 12, RoundingMode.HALF_UP).doubleValue();
